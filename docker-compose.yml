@@ -33,9 +33,9 @@ services:
     ports:
       - "8080:80"
 
-  workshopdjango:                     # 👈 ton service Django
+  workshopdjango:                     
     build:
-      context: ./workshopDjango       # 👈 le dossier où est ton code
+      context: ./workshopDjango      
       dockerfile: Dockerfile
     container_name: django_web
     depends_on: [db]
@@ -47,7 +47,7 @@ services:
       PYTHONDONTWRITEBYTECODE: "1"
       PYTHONUNBUFFERED: "1"
     volumes:
-      - ./workshopDjango:/app         # 👈 hot-reload dev
+      - ./workshopDjango:/app         
     ports:
       - "8000:8000"
     command: >
