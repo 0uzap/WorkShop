@@ -2,6 +2,7 @@ import columnImg from '../assets/column.webp'
 
 const GreekColumn = ({ size = 'md', className = '' }) => {
   const sizes = {
+    xs: 'w-6 h-6',
     sm: 'w-12 h-12',
     md: 'w-16 h-16',
     lg: 'w-20 h-20',
@@ -9,6 +10,7 @@ const GreekColumn = ({ size = 'md', className = '' }) => {
   }
 
   const iconSizes = {
+    xs: 'w-3 h-3',
     sm: 'w-6 h-6',
     md: 'w-10 h-10',
     lg: 'w-12 h-12',
@@ -22,6 +24,7 @@ const GreekColumn = ({ size = 'md', className = '' }) => {
           src={columnImg} 
           alt="Greek column decoration" 
           className={`${iconSizes[size]} object-contain`}
+          style={{ width: '50%', height: '50%' }}
         />
       </div>
     </div>

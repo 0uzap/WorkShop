@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Background from './Background.jsx'
 import GreekColumn from './components/GreekColumn.jsx'
 import GreekFrise from './components/GreekFrise.jsx'
+import PlayerSlot from './components/PlayerSlot.jsx'
 
 const Hub = () => {
   const navigate = useNavigate()
@@ -131,6 +132,31 @@ const Hub = () => {
         {/* Floating decorative elements */}
         <div className="absolute -top-4 -right-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"></div>
         <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
+      </div>
+
+      {/* Player Slots Section */}
+      <div className="relative max-w-4xl w-full mt-12">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-8">
+          <GreekFrise position="top" />
+          
+          <h2 className="text-2xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 mb-8">
+            Joueurs en Attente
+          </h2>
+
+          {/* 4 Player Slots - Grid layout */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 justify-items-center">
+            <PlayerSlot player={{ id: 1 }} />
+            <PlayerSlot player={{ id: 2 }} />
+            <PlayerSlot player={{ id: 3 }} />
+            <PlayerSlot player={{ id: 4 }} />
+          </div>
+
+          <GreekFrise position="bottom" />
+        </div>
+
+        {/* Floating decorative elements */}
+        <div className="absolute -top-4 -left-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"></div>
+        <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
       </div>
     </Background>
   )

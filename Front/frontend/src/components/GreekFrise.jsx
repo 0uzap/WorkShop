@@ -1,43 +1,28 @@
-import friseImg from '../assets/frise-grecque-classique-removebg-preview.png'
+// components/GreekFrise.tsx
+import friseImg from "../assets/frise-grecque-classique-removebg-preview.png";
 
-const GreekFrise = ({ position = 'top', opacity = 50, className = '' }) => {
-  const positions = {
-    top: 'absolute top-0 left-0 right-0',
-    bottom: 'absolute bottom-0 left-0 right-0',
-    both: 'absolute inset-x-0'
-  }
+const GreekFrise = ({ position = "top", opacity = 0.7, className = "" }) => {
+  const Bar = (extra) => (
+    <div className={`${extra} h-10 ${className} overflow-hidden`} style={{ opacity }}>
+      <div className="flex" style={{ width: '100%' }}>
+        <img 
+          src={friseImg} 
+          alt="Frise grecque" 
+          className="h-full object-cover"
+          style={{ width: 'auto', minWidth: '100%', objectFit: 'repeat' }}
+        />
+      </div>
+    </div>
+  );
 
-  if (position === 'both') {
+  if (position === "both") {
     return (
       <>
-        <div className={`absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-${opacity} ${className}`}>
-          <img 
-            src={friseImg} 
-            alt="Greek frise decoration" 
-            className="w-full h-full object-cover opacity-70"
-          />
-        </div>
-        <div className={`absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-${opacity} ${className}`}>
-          <img 
-            src={friseImg} 
-            alt="Greek frise decoration" 
-            className="w-full h-full object-cover opacity-70"
-          />
-        </div>
+        {Bar("absolute top-0 left-0 right-0")}
+        {Bar("absolute bottom-0 left-0 right-0")}
       </>
-    )
+    );
   }
-
-  return (
-    <div className={`${positions[position]} h-2 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-${opacity} ${className}`}>
-      <img 
-        src={friseImg} 
-        alt="Greek frise decoration" 
-        className="w-full h-full object-cover opacity-70"
-      />
-    </div>
-  )
-}
-
-export default GreekFrise
-
+  return Bar(`absolute ${position === "top" ? "top-0" : "bottom-0"} left-0 right-0`);
+};
+export default GreekFrise;
