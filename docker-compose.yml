@@ -1,0 +1,58 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql_django
+    restart: unless-stopped
+    env_file: [.env]
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    command: [
+      "--default-authentication-plugin=mysql_native_password",
+      "--character-set-server=utf8mb4",
+      "--collation-server=utf8mb4_general_ci",
+      "--sql-mode=STRICT_TRANS_TABLES"
+    ]
+    ports:
+      - "3306:3306"
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: pma_django
+    restart: unless-stopped
+    depends_on: [db]
+    env_file: [.env]
+    environment:
+      PMA_HOST: db
+      PMA_USER: ${MYSQL_USER}
+      PMA_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "8080:80"
+
+  workshopdjango:                     
+    build:
+      context: ./workshopDjango      
+      dockerfile: Dockerfile
+    container_name: django_web
+    depends_on: [db]
+    env_file: [.env]
+    environment:
+      DJANGO_SETTINGS_MODULE: workshopDjango.settings
+      MYSQL_HOST: db
+      MYSQL_PORT: "3306"
+      PYTHONDONTWRITEBYTECODE: "1"
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - ./workshopDjango:/app         
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  db_data:
