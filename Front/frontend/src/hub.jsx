@@ -1,5 +1,8 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Background from './Background.jsx'
+import GreekColumn from './components/GreekColumn.jsx'
+import GreekFrise from './components/GreekFrise.jsx'
 
 const Hub = () => {
   const navigate = useNavigate()
@@ -23,26 +26,17 @@ const Hub = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-6">
-      {/* Animated background pattern */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(120,119,198,0.1),transparent_50%)] opacity-30"></div>
-      
+    <Background>
       {/* Main content card */}
       <div className="relative max-w-md w-full">
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-8">
           
           {/* Greek pattern decoration */}
-          <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50"></div>
+          <GreekFrise position="top" />
           
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="inline-block mb-4">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-br from-amber-400 to-yellow-600 rounded-full flex items-center justify-center shadow-lg shadow-amber-500/30">
-                <svg className="w-8 h-8 text-slate-900" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                </svg>
-              </div>
-            </div>
+            <GreekColumn size="md" className="mb-4" />
             
             <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 mb-2">
               Inscription
@@ -138,7 +132,7 @@ const Hub = () => {
         <div className="absolute -top-4 -right-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl"></div>
         <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
       </div>
-    </div>
+    </Background>
   )
 }
 
