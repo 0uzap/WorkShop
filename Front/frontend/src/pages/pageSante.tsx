@@ -34,7 +34,7 @@ const popupContents: Record<string, PopupContent> = {
   },
 };
 
-export default function App() {
+export default function PageSante() {
   const [activePopup, setActivePopup] = useState<string | null>(null);
 
   // états pour les champs de texte par popup
