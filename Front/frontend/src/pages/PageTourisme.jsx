@@ -82,7 +82,6 @@ const PageTourisme = () => {
       <GreekFrise position="bottom" />
       
       <div className="relative z-10 w-full max-w-4xl">
-        {/* Structure identique aux autres pages avec les données spécifiques */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
             <Mountain className="w-8 h-8 text-[#8B7355]" />
@@ -95,10 +94,120 @@ const PageTourisme = () => {
             Explorez les merveilles de la Grèce antique
           </p>
         </div>
-
-        {/* Même structure de carte et interactions que les autres pages */}
-        {/* ... Code identique avec les données de tourisme ... */}
-
+  
+        {/* Progress Indicator */}
+        <div className="mb-8">
+          <div className="flex justify-center gap-2 mb-4">
+            {puzzles.map((_, index) => (
+              <div
+                key={index}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index < currentPuzzleIndex ? 'bg-[#5C4033]' :
+                  index === currentPuzzleIndex ? 'bg-[#8B7355] scale-125' :
+                  'bg-[#C4B5A0]'
+                }`}
+              />
+            ))}
+          </div>
+          <p className="text-center text-[#8B7355] text-sm">
+            Énigme {currentPuzzleIndex + 1} sur {puzzles.length}
+          </p>
+        </div>
+  
+        {/* Main Puzzle Card */}
+        <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
+          validatedAnswers[currentPuzzle.id] === true ? 'border-green-600 shadow-green-600/20' :
+          validatedAnswers[currentPuzzle.id] === false ? 'border-red-600 shake' : ''
+        }`}>
+          <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">
+                {currentPuzzle.title}
+              </h2>
+              {validatedAnswers[currentPuzzle.id] === true ? (
+                <Unlock className="w-6 h-6 text-white" />
+              ) : (
+                <Lock className="w-6 h-6 text-white/60" />
+              )}
+            </div>
+          </div>
+  
+          <div className="p-6">
+            <p className="text-[#5C4033] text-lg mb-6 font-medium">
+              {currentPuzzle.question}
+            </p>
+  
+            {/* Visual hints for rebus */}
+            {currentPuzzle.type === 'rebus' && currentPuzzle.visual && (
+              <div className="flex flex-wrap gap-3 mb-6 justify-center bg-[#F5E6D3] rounded-xl p-4">
+                {currentPuzzle.visual.map((item, idx) => (
+                  <div key={idx} className="text-2xl font-bold text-[#5C4033] px-4 py-2 bg-white rounded-lg shadow-md">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            )}
+  
+            {/* Answer Input */}
+            <div className="flex gap-3 mb-4">
+              <input
+                type="text"
+                value={answers[currentPuzzle.id] || ''}
+                onChange={(e) => setAnswers({...answers, [currentPuzzle.id]: e.target.value})}
+                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                disabled={validatedAnswers[currentPuzzle.id] === true}
+                placeholder="Votre réponse..."
+                className={`flex-1 px-4 py-3 rounded-xl border-2 bg-white focus:outline-none focus:ring-2 transition-all ${
+                  validatedAnswers[currentPuzzle.id] === true
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-[#C4B5A0] focus:ring-[#8B7355]/30 focus:border-[#8B7355]'
+                }`}
+              />
+              
+              <button
+                onClick={handleSubmit}
+                disabled={validatedAnswers[currentPuzzle.id] === true}
+                className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+              >
+                Valider
+              </button>
+              
+              <button
+                onClick={toggleHint}
+                className="px-4 py-3 bg-[#F5E6D3] text-[#5C4033] rounded-xl hover:bg-[#E8D4B8] transition-all shadow-md"
+                title="Indice"
+              >
+                💡
+              </button>
+            </div>
+  
+            {/* Hint Display */}
+            {hints[currentPuzzle.id] && (
+              <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
+                <p className="text-[#8B7355] flex items-center gap-2">
+                  <span className="text-xl">💡</span>
+                  <span className="font-medium">Indice : {currentPuzzle.hint}</span>
+                </p>
+              </div>
+            )}
+  
+            {/* Feedback Messages */}
+            {validatedAnswers[currentPuzzle.id] === true && (
+              <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
+                <CheckCircle className="w-5 h-5" />
+                <span className="font-semibold">Excellent ! Site découvert avec succès !</span>
+              </div>
+            )}
+            {validatedAnswers[currentPuzzle.id] === false && (
+              <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
+                <XCircle className="w-5 h-5" />
+                <span>Ce n'est pas la bonne réponse. Continuez à explorer...</span>
+              </div>
+            )}
+          </div>
+        </div>
+  
+        {/* Transition Overlay */}
         {showTransition && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
@@ -117,8 +226,19 @@ const PageTourisme = () => {
           </div>
         )}
       </div>
+  
+      <style jsx>{`
+        @keyframes shake {
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-5px); }
+          75% { transform: translateX(5px); }
+        }
+        .shake {
+          animation: shake 0.3s ease-in-out;
+        }
+      `}</style>
     </Background>
   );
 };
 
-export default PageTourisme;
+  export default PageTourisme;
