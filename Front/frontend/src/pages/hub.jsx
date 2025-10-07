@@ -137,7 +137,7 @@ const Hub = () => {
 
                 <button
                   type="submit"
-                  className="w-full group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold uppercase text-slate-900 shadow-[inset_0_0_0_2px_rgba(202,138,4,0.9),0_10px_20px_-5px_rgba(0,0,0,0.35)] ring-1 ring-amber-700/40 transition duration-200 hover:from-amber-400 hover:via-yellow-400 hover:to-amber-500 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-amber-400/3"
+                  className="w-full group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold uppercase tracking-[0.18em]  text-slate-900 shadow-[inset_0_0_0_2px_rgba(202,138,4,0.9),0_10px_20px_-5px_rgba(0,0,0,0.35)] ring-1 ring-amber-700/40 transition duration-200 hover:from-amber-400 hover:via-yellow-400 hover:to-amber-500 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-amber-400/3"
                 >
                   <svg className="w-5 h-5 text-amber-950/60" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
