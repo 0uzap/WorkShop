@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Home from './pages/Home.jsx'
-import Hub from './hub.jsx'
+import Hub from './pages/hub.jsx'
 
 function App() {
   return (
