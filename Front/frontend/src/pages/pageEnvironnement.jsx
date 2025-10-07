@@ -1,48 +1,36 @@
-import React, { useState } from "react";
-import { Background } from "../Background";
-import exampleImage from "../assets/serment.png";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Background from '../Background.jsx';
+import GreekFrise from '../components/GreekFrise.jsx';
+import { Leaf, Lock, Unlock, CheckCircle, XCircle, Trophy } from 'lucide-react';
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/dialog";
-import { Button } from "../components/ButtonVariant";
-
-
-const PageSante = ({ onComplete }) => {
+const PageEnvironnement = () => {
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
   const [hints, setHints] = useState({});
   const [validatedAnswers, setValidatedAnswers] = useState({});
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
-  const [showTransition, setShowTransition] = useState(false);
+  const [showFinalSuccess, setShowFinalSuccess] = useState(false);
 
   const puzzles = [
     {
-      id: 'hippocrate',
-      title: "Le Père de la Médecine",
-      question: "Trouve l'intru : Socrate • Platon • Hippocrate • Aristote",
-      answer: "hippocrate",
-      hint: "Un seul d'entre eux est médecin, pas philosophe",
-      type: "choice"
-    },
-    {
-      id: 'serment',
-      question: "On prête serment en mon nom, mais je ne suis ni temple ni tribunal. Qui suis-je ?",
-      answer: "hippocrate",
-      alternativeAnswers: ["serment d'hippocrate", "serment hippocrate"],
-      hint: "Les médecins prêtent ce serment",
+      id: 'olivier',
+      title: "L'Arbre Sacré",
+      question: "Arbre argenté et cadeau d'Athéna, je nourris les athlètes et éclaire les maisons. Qui suis-je ?",
+      answer: "olivier",
+      alternativeAnswers: ["l'olivier", "un olivier"],
+      hint: "Arbre sacré d'Athéna",
       type: "text"
     },
     {
-      id: 'pharmacie',
-      question: "Rébus : Un phare + une masse (marteau) + une scie",
-      answer: "pharmacie",
-      hint: "Lieu où l'on trouve des remèdes",
+      id: 'echo',
+      title: "La Nymphe Maudite",
+      question: "Rébus : une haie (buisson) + K (ou potassium) + de l'eau",
+      answer: "écho",
+      alternativeAnswers: ["echo", "l'écho"],
+      hint: "Nymphe condamnée à répéter",
       type: "rebus",
-      visual: ["🚨 Phare", "🔨 Masse", "🪚 Scie"]
+      visual: ["🌳 Haie", "K", "💧 Eau"]
     }
   ];
 
@@ -66,18 +54,12 @@ const PageSante = ({ onComplete }) => {
     if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
       setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: true});
       
-      // Passer à l'énigme suivante après un délai
       setTimeout(() => {
         if (currentPuzzleIndex < puzzles.length - 1) {
           setCurrentPuzzleIndex(currentPuzzleIndex + 1);
         } else {
-          // Toutes les énigmes sont résolues
-          setShowTransition(true);
-          if (onComplete) {
-            setTimeout(() => {
-              onComplete();
-            }, 2000);
-          }
+          // C'est la fin de l'escape game !
+          setShowFinalSuccess(true);
         }
       }, 1500);
     } else {
@@ -88,31 +70,33 @@ const PageSante = ({ onComplete }) => {
     }
   };
 
+  const handleFinalComplete = () => {
+    // Ici vous pouvez rediriger vers une page de fin ou enregistrer le score
+    navigate('/victory'); // ou '/home' ou toute autre page
+  };
+
   const toggleHint = () => {
     setHints({...hints, [currentPuzzle.id]: !hints[currentPuzzle.id]});
   };
 
   return (
     <Background>
-      <GreekFrise position="top" height={40} opacity={0.8} />
-      <GreekFrise position="bottom" height={40} opacity={0.8} />
+      <GreekFrise position="top" />
+      <GreekFrise position="bottom" />
       
       <div className="relative z-10 w-full max-w-4xl">
-        {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Heart className="w-8 h-8 text-[#8B7355]" />
+            <Leaf className="w-8 h-8 text-[#8B7355]" />
             <h1 className="text-4xl md:text-5xl font-bold text-[#5C4033]">
-              Santé & Médecine
-            </h1>
-            <Heart className="w-8 h-8 text-[#8B7355]" />
+              Environnement</h1>
+            <Leaf className="w-8 h-8 text-[#8B7355]" />
           </div>
           <p className="text-[#8B7355] text-lg">
-            Les secrets d'Asclépios vous attendent
+            La nature et les mystères de la Grèce
           </p>
         </div>
 
-        {/* Progress Indicator */}
         <div className="mb-8">
           <div className="flex justify-center gap-2 mb-4">
             {puzzles.map((_, index) => (
@@ -127,16 +111,14 @@ const PageSante = ({ onComplete }) => {
             ))}
           </div>
           <p className="text-center text-[#8B7355] text-sm">
-            Énigme {currentPuzzleIndex + 1} sur {puzzles.length}
+            Énigme {currentPuzzleIndex + 1} sur {puzzles.length} - Dernière étape !
           </p>
         </div>
 
-        {/* Main Puzzle Card */}
         <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
           validatedAnswers[currentPuzzle.id] === true ? 'border-green-600 shadow-green-600/20' :
           validatedAnswers[currentPuzzle.id] === false ? 'border-red-600 shake' : ''
         }`}>
-          {/* Card Header */}
           <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-white">
@@ -150,13 +132,11 @@ const PageSante = ({ onComplete }) => {
             </div>
           </div>
 
-          {/* Card Body */}
           <div className="p-6">
             <p className="text-[#5C4033] text-lg mb-6 font-medium">
               {currentPuzzle.question}
             </p>
 
-            {/* Visual hints for rebus */}
             {currentPuzzle.type === 'rebus' && currentPuzzle.visual && (
               <div className="flex flex-wrap gap-3 mb-6 justify-center bg-[#F5E6D3] rounded-xl p-4">
                 {currentPuzzle.visual.map((item, idx) => (
@@ -167,7 +147,6 @@ const PageSante = ({ onComplete }) => {
               </div>
             )}
 
-            {/* Answer Input */}
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
@@ -200,7 +179,6 @@ const PageSante = ({ onComplete }) => {
               </button>
             </div>
 
-            {/* Hint Display */}
             {hints[currentPuzzle.id] && (
               <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
                 <p className="text-[#8B7355] flex items-center gap-2">
@@ -210,37 +188,47 @@ const PageSante = ({ onComplete }) => {
               </div>
             )}
 
-            {/* Feedback Messages */}
             {validatedAnswers[currentPuzzle.id] === true && (
               <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
                 <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Excellent ! L'énigme est résolue !</span>
+                <span className="font-semibold">Bravo ! La nature vous révèle ses secrets !</span>
               </div>
             )}
             {validatedAnswers[currentPuzzle.id] === false && (
               <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
                 <XCircle className="w-5 h-5" />
-                <span>Ce n'est pas la bonne réponse. Réessayez...</span>
+                <span>Pas encore, réessayez...</span>
               </div>
             )}
           </div>
         </div>
 
-        {/* Transition Overlay */}
-        {showTransition && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
-              <div className="text-6xl mb-4">⚕️</div>
-              <h2 className="text-3xl font-bold text-[#5C4033] mb-4">
-                Bravo !
+        {/* Modal de victoire finale */}
+        {showFinalSuccess && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+            <div className="bg-gradient-to-br from-[#F5E6D3] to-white rounded-3xl p-8 max-w-md text-center border-4 border-[#D4AF37] shadow-2xl">
+              <div className="text-7xl mb-4 animate-bounce">🏆</div>
+              <h2 className="text-4xl font-bold text-[#5C4033] mb-4">
+                Victoire Olympienne !
               </h2>
-              <p className="text-[#8B7355] mb-6">
-                Vous avez maîtrisé les secrets de la médecine antique !
-                Passons maintenant aux Arts Créatifs...
+              <div className="text-6xl mb-4">⚡</div>
+              <p className="text-[#8B7355] mb-6 text-lg">
+                Félicitations ! Vous avez résolu toutes les énigmes !
+                Les dieux de l'Olympe vous accueillent parmi les héros de la Grèce antique.
               </p>
-              <div className="flex justify-center">
-                <ArrowRight className="w-8 h-8 text-[#8B7355] animate-pulse" />
+              <div className="flex gap-2 justify-center mb-6">
+                <span className="text-3xl">🏛️</span>
+                <span className="text-3xl">⚔️</span>
+                <span className="text-3xl">🦉</span>
+                <span className="text-3xl">🌿</span>
+                <span className="text-3xl">🏺</span>
               </div>
+              <button
+                onClick={handleFinalComplete}
+                className="px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-[#5C4033] font-bold text-lg rounded-xl hover:from-[#FFD700] hover:to-[#D4AF37] transition-all shadow-xl"
+              >
+                Terminer l'Aventure
+              </button>
             </div>
           </div>
         )}
@@ -260,4 +248,4 @@ const PageSante = ({ onComplete }) => {
   );
 };
 
-export default PageSante;
+export default PageEnvironnement;
