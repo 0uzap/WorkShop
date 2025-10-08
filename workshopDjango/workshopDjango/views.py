@@ -250,17 +250,20 @@ def add_players_to_session(request):
 
 @csrf_exempt
 def player_ready(request):
+    print(f"🎯 player_ready appelé - Méthode: {request.method}")
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
             session_id = data.get('session_id')
             user_id = data.get('user_id')
+            print(f"📝 Données reçues - session_id: {session_id}, user_id: {user_id}")
 
             session = Session.objects.get(id=session_id)
             player = Player.objects.get(session=session, user__id=user_id)
 
             player.ready = True
             player.save()
+            print(f"✅ Joueur {player.user.username} marqué comme prêt")
 
             return JsonResponse({
                 "status": "success",
@@ -268,9 +271,14 @@ def player_ready(request):
             })
 
         except Session.DoesNotExist:
+            print(f"❌ Session non trouvée: {session_id}")
             return JsonResponse({"status": "error", "message": "Session non trouvée"}, status=404)
         except Player.DoesNotExist:
+            print(f"❌ Joueur non trouvé: user_id={user_id}, session_id={session_id}")
             return JsonResponse({"status": "error", "message": "Joueur non trouvé dans la session"}, status=404)
+        except Exception as e:
+            print(f"❌ Erreur inattendue: {e}")
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
     return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
 
