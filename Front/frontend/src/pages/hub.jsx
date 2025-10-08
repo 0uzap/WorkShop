@@ -49,6 +49,7 @@ const Hub = () => {
         // Stocker les infos de session
         localStorage.setItem('user', JSON.stringify({
           username: data.user,
+          user_id: data.user_id,
           session_id: data.session_id
         }));
         

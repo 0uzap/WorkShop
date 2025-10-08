@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from '../Background';
 import GreekFrise from '../components/GreekFrise';
+import GreekColumn from '../components/GreekColumn';
+import Profil from '../components/Profil';
 import { Users, Clock, CheckCircle, XCircle } from 'lucide-react';
 
 const Lobby = () => {
@@ -63,7 +65,6 @@ const Lobby = () => {
       console.error('Error fetching session status:', err);
     }
   };
-
   const handleReady = async () => {
     setLoading(true);
     try {
@@ -151,61 +152,65 @@ const Lobby = () => {
           </p>
         </div>
 
-        <div className="bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 p-6">
+        <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border-2 border-[#8B7355]/20 p-8">
           {/* Session Info */}
-          <div className="bg-[#F5E6D3] rounded-lg p-4 mb-6">
-            <p className="text-sm text-[#8B7355] mb-2">Code de session</p>
-            <div className="flex items-center gap-3">
-              <code className="text-2xl font-bold text-[#5C4033]">
-                {sessionId ? sessionId.slice(0, 8).toUpperCase() : '...'}
-              </code>
-              <button
-                onClick={invitePlayer}
-                className="px-3 py-1 bg-[#8B7355] text-white rounded-lg hover:bg-[#7A6248] transition"
-              >
-                📋 Copier
-              </button>
+          <div className="flex justify-center mb-8">
+            <div className="bg-[#DDD1BC] border-4 border-black px-6 py-2 rounded-md">
+              <p className="text-xs text-[#5C4033] font-semibold mb-1">CODE SESSION</p>
+              <div className="flex items-center gap-3">
+                <code className="text-2xl font-extrabold text-black tracking-wide">
+                  {sessionId ? sessionId.slice(0, 8).toUpperCase() : '...'}
+                </code>
+                <button
+                  onClick={invitePlayer}
+                  className="px-3 py-1 bg-[#8B7355] text-white rounded-lg hover:bg-[#7A6248] transition text-sm"
+                >
+                  📋
+                </button>
+              </div>
             </div>
           </div>
 
-          {/* Players Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          {/* Players in Row - Using PlayerSlot-like components */}
+          <div className="mt-6 flex flex-row justify-center items-start gap-12 px-4 mb-8">
             {[...Array(4)].map((_, index) => {
               const player = players[index];
               return (
                 <div
                   key={index}
-                  className={`relative p-4 rounded-xl border-2 transition-all ${
-                    player 
-                      ? 'bg-white border-[#8B7355]/40' 
-                      : 'bg-gray-100 border-gray-300 border-dashed'
-                  }`}
+                  className="relative flex flex-col items-center gap-1"
                 >
-                  {player ? (
-                    <>
-                      <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-2 bg-gradient-to-br from-[#8B7355] to-[#A0826D] rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                          {player.username[0].toUpperCase()}
-                        </div>
-                        <p className="font-semibold text-[#5C4033]">
-                          {player.username}
-                        </p>
-                        {player.ready && (
-                          <CheckCircle className="w-5 h-5 text-green-500 mx-auto mt-2" />
-                        )}
+                 
+                  
+                  {/* Profil Image */}
+                  <div className={`relative ${player ? '' : 'opacity-30'}`}>
+                    <Profil size="md" showBorder={true} name={player ? player.username : 'En attente'} />
+                    {!player && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Users className="w-8 h-8 text-gray-500" />
                       </div>
-                      {player.username === currentUser.username && (
-                        <div className="absolute -top-2 -right-2 bg-[#D4AF37] text-white text-xs px-2 py-1 rounded-full">
-                          Vous
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-4">
-                      <Users className="w-12 h-12 mx-auto text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-500">En attente...</p>
-                    </div>
-                  )}
+                    )}
+                  </div>
+                  
+                  {/* Greek Column */}
+                  <GreekColumn size="sm" />
+                  
+                  {/* Ready Status */}
+                  <div className="mt-2">
+                    {player && player.ready ? (
+                      <div className="flex items-center gap-1 bg-green-500/20 px-3 py-1 rounded-full border-2 border-green-500">
+                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-xs text-green-500 font-bold">Prêt</span>
+                      </div>
+                    ) : player ? (
+                      <div className="flex items-center gap-1 bg-orange-500/20 px-3 py-1 rounded-full border-2 border-orange-500">
+                        <Clock className="w-4 h-4 text-orange-500" />
+                        <span className="text-xs text-orange-500 font-bold">En attente</span>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-6"></div>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -217,21 +222,21 @@ const Lobby = () => {
               <button
                 onClick={handleReady}
                 disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50"
+                className="px-10 py-4 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-extrabold text-lg rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 shadow-xl uppercase tracking-wider"
               >
-                {loading ? 'Chargement...' : 'Je suis prêt !'}
+                {loading ? '⏳ Chargement...' : '⚔️ Je suis prêt !'}
               </button>
             </div>
           )}
 
           {/* Status Messages */}
-          <div className="bg-[#FFF8DC] rounded-lg p-4">
-            <p className="text-center text-[#8B7355]">
+          <div className="bg-[#DDD1BC]/20 backdrop-blur border-2 border-[#8B7355]/30 rounded-xl p-4">
+            <p className="text-center text-white font-semibold">
               {players.length < 4 
-                ? `En attente de ${4 - players.length} joueur(s)...`
+                ? `⏳ En attente de ${4 - players.length} héros...`
                 : players.every(p => p.ready)
-                ? '✅ Tous les joueurs sont prêts !'
-                : `En attente que tous les joueurs soient prêts (${players.filter(p => p.ready).length}/4)`
+                ? '✅ Tous les héros sont prêts ! Le voyage commence...'
+                : `⏳ Héros prêts: ${players.filter(p => p.ready).length}/4`
               }
             </p>
           </div>

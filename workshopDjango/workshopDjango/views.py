@@ -35,6 +35,7 @@ def login_api(request):
                     "status": "success",
                     "message": "Connexion réussie",
                     "user": user.username,
+                    "user_id": user.id,
                     "session_id": str(session.id),
                     "players_in_session": players_list
                 }, status=200)
@@ -94,7 +95,6 @@ def register_api(request):
 
 
 @csrf_exempt
-@login_required
 def join_session(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -154,7 +154,6 @@ def get_progress(request, session_id):
         return JsonResponse({"status": "error", "message": "Progression non trouvée"}, status=404)
 
 @csrf_exempt
-@login_required
 def start_game(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -195,7 +194,6 @@ def start_game(request):
 
 
 @csrf_exempt
-@login_required
 def add_players_to_session(request):
     if request.method == 'POST':
         try:
@@ -251,7 +249,6 @@ def add_players_to_session(request):
     return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
 
 @csrf_exempt
-@login_required
 def player_ready(request):
     if request.method == 'POST':
         try:
