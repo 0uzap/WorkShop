@@ -310,3 +310,66 @@ def session_status(request):
             return JsonResponse({'status': 'error', 'message': 'Session not found'}, status=404)
     
     return JsonResponse({'status': 'error'}, status=405)
+
+@csrf_exempt
+@login_required
+def send_message(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            session_id = data.get('session_id')
+            message = data.get('message')
+
+            if not message:
+                return JsonResponse({"status": "error", "message": "Message vide"}, status=400)
+
+            try:
+                session = Session.objects.get(id=session_id)
+            except Session.DoesNotExist:
+                return JsonResponse({"status": "error", "message": "Session non trouvée"}, status=404)
+
+            # Vérifier que l’utilisateur fait partie de la session
+            if not Player.objects.filter(session=session, user=request.user).exists():
+                return JsonResponse({"status": "error", "message": "Utilisateur non autorisé"}, status=403)
+
+            chat = ChatMessage.objects.create(session=session, sender=request.user, content=message)
+
+            return JsonResponse({
+                "status": "success",
+                "message": "Message envoyé",
+                "data": {
+                    "id": chat.id,
+                    "sender": chat.sender.username,
+                    "content": chat.content,
+                    "timestamp": chat.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+                }
+            }, status=201)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Format JSON invalide"}, status=400)
+
+    return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
+
+
+@login_required
+def get_messages(request, session_id):
+    try:
+        session = Session.objects.get(id=session_id)
+    except Session.DoesNotExist:
+        return JsonResponse({"status": "error", "message": "Session non trouvée"}, status=404)
+
+    # Vérifier que l’utilisateur appartient à cette session
+    if not Player.objects.filter(session=session, user=request.user).exists():
+        return JsonResponse({"status": "error", "message": "Utilisateur non autorisé"}, status=403)
+
+    messages = ChatMessage.objects.filter(session=session).order_by("timestamp")
+    data = [
+        {
+            "sender": msg.sender.username,
+            "content": msg.content,
+            "timestamp": msg.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+        }
+        for msg in messages
+    ]
+
+    return JsonResponse({"status": "success", "messages": data}, status=200)

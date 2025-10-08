@@ -26,3 +26,12 @@ class Progress(models.Model):
     time_remaining = models.IntegerField(default=0)
     class Meta:
         app_label = 'workshopDjango'
+
+class ChatMessage(models.Model):
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def str(self):
+        return f"{self.sender.username}: {self.content[:30]}"
