@@ -1,24 +1,20 @@
 import React, { useState } from "react";
-import { Background } from "../Background";
-import exampleImage from "../assets/serment.png";
+import Background from "../Background";
+import GreekFrise from "../components/GreekFrise";
+import GameTimer from "../components/GameTimer";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/dialog";
-import { Button } from "../components/ButtonVariant";
+import { Heart, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
-const PageSante = ({ onComplete }) => {
+const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
   const [hints, setHints] = useState({});
   const [validatedAnswers, setValidatedAnswers] = useState({});
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
   const [showTransition, setShowTransition] = useState(false);
-
+  const [gameOver, setGameOver] = useState(false);
   const puzzles = [
     {
       id: 'hippocrate',
@@ -48,11 +44,11 @@ const PageSante = ({ onComplete }) => {
 
   const currentPuzzle = puzzles[currentPuzzleIndex];
 
-  const normalizeAnswer = (answer) => {
+  const normalizeAnswer = (answer: string) => {
     return answer.toLowerCase().trim().replace(/[^a-zàâäéèêëïîôùûüÿœæç]/gi, '');
   };
 
-  const checkAnswer = (userAnswer, correctAnswer, alternativeAnswers = []) => {
+  const checkAnswer = (userAnswer: string, correctAnswer: string, alternativeAnswers: string[] = []) => {
     const normalized = normalizeAnswer(userAnswer);
     const correct = normalizeAnswer(correctAnswer);
     const alternatives = alternativeAnswers.map(a => normalizeAnswer(a));
@@ -61,7 +57,7 @@ const PageSante = ({ onComplete }) => {
   };
 
   const handleSubmit = () => {
-    const userAnswer = answers[currentPuzzle.id] || '';
+    const userAnswer = answers[currentPuzzle.id as keyof typeof answers] || '';
     
     if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
       setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: true});
@@ -89,14 +85,41 @@ const PageSante = ({ onComplete }) => {
   };
 
   const toggleHint = () => {
-    setHints({...hints, [currentPuzzle.id]: !hints[currentPuzzle.id]});
+    setHints({...hints, [currentPuzzle.id]: !hints[currentPuzzle.id as keyof typeof hints]});
   };
 
   return (
-    <Background>
-      <GreekFrise position="top" height={40} opacity={0.8} />
-      <GreekFrise position="bottom" height={40} opacity={0.8} />
+    <>
+      <GameTimer onTimeUp={() => setGameOver(true)} />
       
+      <Background>
+        <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
+        <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
+
+      {gameOver && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 text-center max-w-md">
+            <div className="text-6xl mb-4">⏰</div>
+            <h2 className="text-3xl font-bold text-[#5C4033] mb-4">
+              Temps écoulé !
+            </h2>
+            <p className="text-[#8B7355] mb-6">
+              Les dieux ne vous ont pas accordé assez de temps...
+              L'Olympe reste fermé pour cette fois.
+            </p>
+             <button
+               onClick={() => {
+                 localStorage.removeItem('gameStartTime');
+                 localStorage.removeItem('user');
+                 navigate('/hub');
+               }}
+               className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all"
+             >
+               Réessayer
+             </button>
+          </div>
+        </div>
+      )}
       <div className="relative z-10 w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -133,8 +156,8 @@ const PageSante = ({ onComplete }) => {
 
         {/* Main Puzzle Card */}
         <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
-          validatedAnswers[currentPuzzle.id] === true ? 'border-green-600 shadow-green-600/20' :
-          validatedAnswers[currentPuzzle.id] === false ? 'border-red-600 shake' : ''
+          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? 'border-green-600 shadow-green-600/20' :
+          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false ? 'border-red-600 shake' : ''
         }`}>
           {/* Card Header */}
           <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
@@ -142,7 +165,7 @@ const PageSante = ({ onComplete }) => {
               <h2 className="text-xl font-bold text-white">
                 {currentPuzzle.title}
               </h2>
-              {validatedAnswers[currentPuzzle.id] === true ? (
+              {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? (
                 <Unlock className="w-6 h-6 text-white" />
               ) : (
                 <Lock className="w-6 h-6 text-white/60" />
@@ -171,13 +194,13 @@ const PageSante = ({ onComplete }) => {
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
-                value={answers[currentPuzzle.id] || ''}
+                value={answers[currentPuzzle.id as keyof typeof answers] || ''}
                 onChange={(e) => setAnswers({...answers, [currentPuzzle.id]: e.target.value})}
                 onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                disabled={validatedAnswers[currentPuzzle.id] === true}
+                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
                 placeholder="Votre réponse..."
                 className={`flex-1 px-4 py-3 rounded-xl border-2 bg-white focus:outline-none focus:ring-2 transition-all ${
-                  validatedAnswers[currentPuzzle.id] === true
+                  validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true
                     ? 'border-green-500 bg-green-50'
                     : 'border-[#C4B5A0] focus:ring-[#8B7355]/30 focus:border-[#8B7355]'
                 }`}
@@ -185,7 +208,7 @@ const PageSante = ({ onComplete }) => {
               
               <button
                 onClick={handleSubmit}
-                disabled={validatedAnswers[currentPuzzle.id] === true}
+                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
                 className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 Valider
@@ -201,7 +224,7 @@ const PageSante = ({ onComplete }) => {
             </div>
 
             {/* Hint Display */}
-            {hints[currentPuzzle.id] && (
+            {hints[currentPuzzle.id as keyof typeof hints] && (
               <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
                 <p className="text-[#8B7355] flex items-center gap-2">
                   <span className="text-xl">💡</span>
@@ -211,13 +234,13 @@ const PageSante = ({ onComplete }) => {
             )}
 
             {/* Feedback Messages */}
-            {validatedAnswers[currentPuzzle.id] === true && (
+            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true && (
               <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-semibold">Excellent ! L'énigme est résolue !</span>
               </div>
             )}
-            {validatedAnswers[currentPuzzle.id] === false && (
+            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false && (
               <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
                 <XCircle className="w-5 h-5" />
                 <span>Ce n'est pas la bonne réponse. Réessayez...</span>
@@ -246,17 +269,8 @@ const PageSante = ({ onComplete }) => {
         )}
       </div>
 
-      <style jsx>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-        .shake {
-          animation: shake 0.3s ease-in-out;
-        }
-      `}</style>
-    </Background>
+      </Background>
+    </>
   );
 };
 

@@ -16,15 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-=======
 from . import views 
 
 urlpatterns = [
-   path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('api/login/', views.login_api, name='login_api'),
     path('api/register/', views.register_api, name='register_api'),
      # 🎮 Routes du jeu
@@ -34,8 +29,7 @@ urlpatterns = [
     path('api/progress/<str:session_id>/', views.get_progress),
     path('api/add-players/', views.add_players_to_session, name='add_players_to_session'),
     path('api/player-ready/', views.player_ready, name='player_ready'),
-path('api/start-game/', views.start_game, name='start_game'),
+    path('api/start-game/', views.start_game, name='start_game'),
+    path('api/session-status/', views.session_status, name='session_status'),
 
-
->>>>>>> 83b42e1f (Initial commit)
 ]

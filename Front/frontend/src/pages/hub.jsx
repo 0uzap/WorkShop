@@ -10,30 +10,134 @@ const TILE_WIDTH = 160;     // Motif width
 
 const Hub = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ nom: "", prenom: "", equipe: "" });
+  const [formData, setFormData] = useState({ username: "", password: "" , confirmPassword: "" });
+  const [error, setError] = useState("");
+  const [loading,setLoading] = useState(false);
+  const [sessionInfo,setSessionInfo] = useState(null);
+  const [isLogin, setIsLogin] = useState(true);
+
+  const API_BASE_URL = "http://localhost:8000/api"; 
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setError("");
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(""); 
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+        credentials: 'include', // Important pour les cookies de session
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Stocker les infos de session
+        localStorage.setItem('user', JSON.stringify({
+          username: data.user,
+          user_id: data.user_id,
+          session_id: data.session_id
+        }));
+        
+        setSessionInfo(data);
+        
+        // Redirection après connexion réussie
+        setTimeout(() => {
+          navigate('/lobby'); // Vers la première page du jeu
+        }, 1500);
+      } else {
+        setError(data.message || "Erreur de connexion");
+      }
+    } catch (err) {
+      setError("Erreur de connexion au serveur");
+      console.error("Erreur:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    // Validation
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Le mot de passe doit contenir au moins 6 caractères");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      console.log("Tentative d'inscription avec:", { username: formData.username });
+      
+      const response = await fetch(`${API_BASE_URL}/register/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+      console.log("Réponse du serveur:", response.status, data);
+
+      if (response.ok) {
+        console.log("Inscription réussie, tentative de connexion...");
+        // Auto-login après inscription
+        await handleLogin(e);
+      } else {
+        setError(data.message || "Erreur lors de l'inscription");
+        console.error("Erreur d'inscription:", data);
+      }
+    } catch (err) {
+      setError("Erreur de connexion au serveur");
+      console.error("Erreur:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Inscription:", formData);
-    // your submit logic here
+    if (isLogin) {
+      handleLogin(e);
+    } else {
+      handleRegister(e);
+    }
   };
 
   return (
     <Background>
-      {/* Top & bottom frise (fixed) */}
       <GreekFrise position="top" height={FRIESE_HEIGHT} tileWidth={TILE_WIDTH} />
       <GreekFrise position="bottom" height={FRIESE_HEIGHT} tileWidth={TILE_WIDTH} />
 
-      {/* Page container — reserve space for the frises so nothing is hidden */}
       <div
         className="w-full"
         style={{
-          // Space equals the frise height top & bottom
           paddingTop: FRIESE_HEIGHT,
           paddingBottom: FRIESE_HEIGHT,
         }}
@@ -42,133 +146,149 @@ const Hub = () => {
         <header className="max-w-5xl mx-auto px-6 text-center mb-10">
           <div className="inline-flex items-center gap-3 mb-3">
             <GreekColumn size="md" />
-            <span className="text-sm tracking-widest uppercase text-amber-300/80">
+            <span className="text-sm tracking-widest uppercase text-[#8B7355]">
               Agora • Opération Héphaïstos
             </span>
             <GreekColumn size="md" className="scale-x-[-1]" />
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-300 to-amber-200 drop-shadow-sm">
-            Rejoignez l’expédition
+          <h1 className="text-4xl md:text-5xl font-extrabold text-[#5C4033]">
+            {isLogin ? "Rejoignez l'Olympe" : "Créez votre Légende"}
           </h1>
-          <p className="mt-3 text-slate-300/90">
-            Formez votre équipe et inscrivez-vous pour entrer dans la légende.
+          <p className="mt-3 text-[#8B7355]/90">
+            {isLogin 
+              ? "Connectez-vous pour continuer votre aventure" 
+              : "Inscrivez-vous pour débuter votre épopée"}
           </p>
         </header>
 
-        {/* Main grid */}
-        <main className="max-w-5xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Registration Card */}
+        {/* Main content */}
+        <main className="max-w-md mx-auto px-6">
           <section className="relative">
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8">
-              {/* Decorative top frise inside card (not fixed) */}
-              <div className="relative">
-                <div
-                  className="pointer-events-none absolute -top-3 left-0 right-0 h-3 opacity-70"
-                  style={{
-                    backgroundImage: `url(/src/assets/frise-grecque-classique-removebg-preview.png)`,
-                    backgroundRepeat: "repeat-x",
-                    backgroundSize: "80px 100%",
-                    backgroundPosition: "center",
-                  }}
-                  aria-hidden
-                />
-              </div>
+            <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl border-2 border-[#8B7355]/20 p-6 md:p-8">
+              
+              <h2 className="text-2xl font-bold text-[#5C4033] mb-6 text-center">
+                {isLogin ? "Connexion" : "Inscription"}
+              </h2>
 
-              <h2 className="text-2xl font-bold text-amber-100 mb-6">Inscription</h2>
+              {error && (
+                <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                  {error}
+                </div>
+              )}
+
+              {sessionInfo && (
+                <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm">
+                  Bienvenue {sessionInfo.user} ! Redirection...
+                </div>
+              )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
-                  <label htmlFor="nom" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Nom
+                  <label htmlFor="username" className="block text-sm font-medium text-[#5C4033] mb-1.5">
+                    Nom d'utilisateur
                   </label>
                   <input
                     type="text"
-                    id="nom"
-                    name="nom"
-                    value={formData.nom}
+                    id="username"
+                    name="username"
+                    value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-slate-900/60 border border-slate-600/60 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/60 transition"
-                    placeholder="Entrez votre nom"
+                    className="w-full px-4 py-3 bg-white border-2 border-[#C4B5A0] rounded-xl text-[#5C4033] placeholder-[#8B7355]/50 focus:outline-none focus:ring-2 focus:ring-[#8B7355]/30 focus:border-[#8B7355] transition"
+                    placeholder="Votre nom de héros"
                   />
                 </div>
 
                 <div>
-                  <label htmlFor="prenom" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Prénom
+                  <label htmlFor="password" className="block text-sm font-medium text-[#5C4033] mb-1.5">
+                    Mot de passe
                   </label>
                   <input
-                    type="text"
-                    id="prenom"
-                    name="prenom"
-                    value={formData.prenom}
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full px-4 py-3 bg-slate-900/60 border border-slate-600/60 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/60 transition"
-                    placeholder="Entrez votre prénom"
+                    className="w-full px-4 py-3 bg-white border-2 border-[#C4B5A0] rounded-xl text-[#5C4033] placeholder-[#8B7355]/50 focus:outline-none focus:ring-2 focus:ring-[#8B7355]/30 focus:border-[#8B7355] transition"
+                    placeholder="••••••••"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="equipe" className="block text-sm font-medium text-slate-300 mb-1.5">
-                    Nom d’équipe
-                  </label>
-                  <input
-                    type="text"
-                    id="equipe"
-                    name="equipe"
-                    value={formData.equipe}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 bg-slate-900/60 border border-slate-600/60 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500/60 transition"
-                    placeholder="Les Argonautes"
-                  />
-                </div>
+                {!isLogin && (
+                  <div>
+                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-[#5C4033] mb-1.5">
+                      Confirmer le mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      required={!isLogin}
+                      className="w-full px-4 py-3 bg-white border-2 border-[#C4B5A0] rounded-xl text-[#5C4033] placeholder-[#8B7355]/50 focus:outline-none focus:ring-2 focus:ring-[#8B7355]/30 focus:border-[#8B7355] transition"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                )}
 
                 {/* Divider */}
                 <div className="flex items-center justify-center gap-4 my-4">
-                  <div className="h-px bg-gradient-to-r from-transparent to-amber-500/40 flex-1" />
-                  <svg className="w-4 h-4 text-amber-400/80" viewBox="0 0 24 24" fill="currentColor">
+                  <div className="h-px bg-gradient-to-r from-transparent to-[#8B7355]/40 flex-1" />
+                  <svg className="w-4 h-4 text-[#8B7355]/80" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 3L14 9H20L15 13L17 19L12 15L7 19L9 13L4 9H10L12 3Z" />
                   </svg>
-                  <div className="h-px bg-gradient-to-l from-transparent to-amber-500/40 flex-1" />
+                  <div className="h-px bg-gradient-to-l from-transparent to-[#8B7355]/40 flex-1" />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold uppercase tracking-[0.18em]  text-slate-900 shadow-[inset_0_0_0_2px_rgba(202,138,4,0.9),0_10px_20px_-5px_rgba(0,0,0,0.35)] ring-1 ring-amber-700/40 transition duration-200 hover:from-amber-400 hover:via-yellow-400 hover:to-amber-500 hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-amber-400/3"
+                  disabled={loading}
+                  className="w-full group relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold uppercase tracking-[0.18em] bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white shadow-lg transition duration-200 hover:from-[#7A6248] hover:to-[#8B7355] hover:-translate-y-0.5 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-[#8B7355]/30 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg className="w-5 h-5 text-amber-950/60" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                  </svg>
-                  <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">S’inscrire</span>
+                  {loading ? (
+                    <span className="animate-spin">⚙️</span>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                      </svg>
+                      <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
+                        {isLogin ? "Se connecter" : "S'inscrire"}
+                      </span>
+                    </>
+                  )}
                 </button>
 
-                <p className="text-center text-xs text-slate-500 mt-3">
-                  En vous inscrivant, vous acceptez de participer à l’aventure épique.
+                <p className="text-center text-sm text-[#8B7355] mt-4">
+                  {isLogin ? "Pas encore de compte ?" : "Déjà inscrit ?"}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsLogin(!isLogin);
+                      setError("");
+                      setFormData({ username: "", password: "", confirmPassword: "" });
+                    }}
+                    className="ml-2 text-[#5C4033] font-semibold hover:underline"
+                  >
+                    {isLogin ? "Inscrivez-vous" : "Connectez-vous"}
+                  </button>
                 </p>
               </form>
             </div>
-          </section>
 
-          {/* Lobby / Slots Card */}
-          <section className="relative">
-            <div className="bg-slate-800/50 backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-700/50 p-6 md:p-8">
-              <h2 className="text-2xl font-bold text-amber-100 mb-2">Salon d’équipe</h2>
-              <p className="text-slate-300/90 mb-6">
-                Invitez vos coéquipiers, choisissez un nom et préparez votre plan.
-              </p>
-
-              {/* Soft glowing decor */}
-              <div className="absolute -top-4 -left-4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl" />
-              <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
-            </div>
+            {/* Decorative elements */}
+            <div className="absolute -top-4 -left-4 w-24 h-24 bg-[#8B7355]/10 rounded-full blur-2xl" />
+            <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-[#A0826D]/10 rounded-full blur-2xl" />
           </section>
         </main>
       </div>
     </Background>
   );
 };
+
+
 
 export default Hub;

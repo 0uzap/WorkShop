@@ -24,12 +24,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-<<<<<<< HEAD
-    # Ajoute ici tes apps Django personnalisées si tu en crées
-=======
+    "corsheaders",
     'workshopDjango', 
     # Ajoute ici tes apps Djansgo personnalisées si tu en crées
->>>>>>> 83b42e1f (Initial commit)
 ]
 
 
@@ -37,6 +34,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -68,35 +67,32 @@ TEMPLATES = [
 ]
 
 
-# --- Base de données (MySQL via Docker) ---
+# --- Base de données (SQLite for development) ---
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.mysql",
-<<<<<<< HEAD
-        "NAME": os.getenv("MYSQL_DATABASE", "django_db"),
-        "USER": os.getenv("MYSQL_USER", "django_user"),
-        "PASSWORD": os.getenv("MYSQL_PASSWORD", ""),
-        "HOST": os.getenv("MYSQL_HOST", "db"),  # nom du service Docker MySQL
-        "PORT": os.getenv("MYSQL_PORT", "3306"),
-        "OPTIONS": {"init_command": "SET sql_mode='STRICT_TRANS_TABLES'"},
-=======
-        "NAME": "workshop_db",      # crée cette base dans MySQL
-        "USER": "root",             # ton utilisateur MySQL
-        "PASSWORD": "",             # ton mot de passe MySQL
-        "HOST": "localhost",        # ou "db" si Docker
-        "PORT": "3306",
-        "OPTIONS": {
-            "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
-        },
->>>>>>> 83b42e1f (Initial commit)
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
 }
 
 
-<<<<<<< HEAD
-=======
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+]
 
->>>>>>> 83b42e1f (Initial commit)
+# Autoriser l'envoi de cookies et credentials
+CORS_ALLOW_CREDENTIALS = True
+
+# Autoriser tous les headers nécessaires
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+
 # --- Validation des mots de passe ---
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
