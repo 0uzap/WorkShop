@@ -16,11 +16,6 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-<<<<<<< HEAD
-
-urlpatterns = [
-    path('admin/', admin.site.urls),
-=======
 from . import views 
 
 urlpatterns = [
@@ -37,5 +32,4 @@ urlpatterns = [
 path('api/start-game/', views.start_game, name='start_game'),
 
 
->>>>>>> 83b42e1f (Initial commit)
 ]
