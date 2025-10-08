@@ -76,21 +76,21 @@ def register_api(request):
 #@login_required
 #def create_session(request):
     #if request.method == 'POST':
-       # user = request.user
-       # session = Session.objects.create(creator=user)
+    # user = request.user
+    # session = Session.objects.create(creator=user)
 
         # Ajouter le créateur comme joueur
-       # Player.objects.create(session=session, user=user, role="joueur")
+    # Player.objects.create(session=session, user=user, role="joueur")
         
         # Initialiser le suivi de progression
-       # Progress.objects.create(session=session, room_state={}, fragments={}, time_remaining=0)
+    # Progress.objects.create(session=session, room_state={}, fragments={}, time_remaining=0)
 
         #return JsonResponse({
-          #  "status": "success",
-          #  "message": "Session créée",
-           # "session_id": str(session.id)
-       # }, status=201)
-   # return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
+        #  "status": "success",
+        #  "message": "Session créée",
+        # "session_id": str(session.id)
+    # }, status=201)
+# return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
 
 
 @csrf_exempt
@@ -152,7 +152,7 @@ def get_progress(request, session_id):
         })
     except Progress.DoesNotExist:
         return JsonResponse({"status": "error", "message": "Progression non trouvée"}, status=404)
-    
+
 @csrf_exempt
 @login_required
 def start_game(request):
@@ -191,6 +191,7 @@ def start_game(request):
             return JsonResponse({"status": "error", "message": "Session non trouvée"}, status=404)
 
     return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
+
 
 
 @csrf_exempt
@@ -277,3 +278,30 @@ def player_ready(request):
     return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
 
 
+# views.py - Add this new endpoint
+@csrf_exempt
+def session_status(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        session_id = data.get('session_id')
+        
+        try:
+            session = Session.objects.get(id=session_id)
+            players = Player.objects.filter(session=session)
+            
+            players_list = [{
+                'id': p.user.id,
+                'username': p.user.username,
+                'ready': p.ready
+            } for p in players]
+            
+            return JsonResponse({
+                'status': 'success',
+                'players': players_list,
+                'all_ready': all(p.ready for p in players),
+                'game_started': session.started_at is not None
+            })
+        except Session.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Session not found'}, status=404)
+    
+    return JsonResponse({'status': 'error'}, status=405)

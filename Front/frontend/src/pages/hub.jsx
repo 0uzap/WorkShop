@@ -56,7 +56,7 @@ const Hub = () => {
         
         // Redirection après connexion réussie
         setTimeout(() => {
-          navigate('/sante'); // Vers la première page du jeu
+          navigate('/lobby'); // Vers la première page du jeu
         }, 1500);
       } else {
         setError(data.message || "Erreur de connexion");

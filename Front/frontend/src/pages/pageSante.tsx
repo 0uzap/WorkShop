@@ -1,26 +1,20 @@
 import React, { useState } from "react";
 import Background from "../Background";
 import GreekFrise from "../components/GreekFrise";
-import exampleImage from "../assets/serment.png";
+import GameTimer from "../components/GameTimer";
 
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "../components/dialog";
-import { Button } from "../components/ButtonVariant";
 import { Heart, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
+  const navigate = useNavigate();
   const [answers, setAnswers] = useState({});
   const [hints, setHints] = useState({});
   const [validatedAnswers, setValidatedAnswers] = useState({});
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
   const [showTransition, setShowTransition] = useState(false);
-
+  const [gameOver, setGameOver] = useState(false);
   const puzzles = [
     {
       id: 'hippocrate',
@@ -95,10 +89,37 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
   };
 
   return (
-    <Background>
-      <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
-      <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
+    <>
+      <GameTimer onTimeUp={() => setGameOver(true)} />
       
+      <Background>
+        <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
+        <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
+
+      {gameOver && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 text-center max-w-md">
+            <div className="text-6xl mb-4">⏰</div>
+            <h2 className="text-3xl font-bold text-[#5C4033] mb-4">
+              Temps écoulé !
+            </h2>
+            <p className="text-[#8B7355] mb-6">
+              Les dieux ne vous ont pas accordé assez de temps...
+              L'Olympe reste fermé pour cette fois.
+            </p>
+             <button
+               onClick={() => {
+                 localStorage.removeItem('gameStartTime');
+                 localStorage.removeItem('user');
+                 navigate('/hub');
+               }}
+               className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all"
+             >
+               Réessayer
+             </button>
+          </div>
+        </div>
+      )}
       <div className="relative z-10 w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -248,7 +269,8 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
         )}
       </div>
 
-    </Background>
+      </Background>
+    </>
   );
 };
 

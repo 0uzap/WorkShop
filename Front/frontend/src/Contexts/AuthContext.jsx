@@ -1,42 +1,40 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 
-const AuthContewt = createContext();
+const AuthContext = createContext();
 
-export const AuthProvider = ({children}) => {
-    const [user,setUser] = useState(null); 
-    const [sessionId,setSessionId] = useState(null);
-    const [loading,setLoading] = useState(false);
+export const useAuth = () => useContext(AuthContext);
 
-    useEffect(() => {
-        const storedUser = localStorage.getItem('user'); 
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-        if(storedUser){
+  useEffect(() => {
+    // Récupérer les données stockées au chargement
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData.username);
+      setSessionId(userData.session_id);
+    }
+    setLoading(false);
+  }, []);
 
-            const userData = JSON.parse(storedUser);
-            setUser(userData.username);
-            setSessionId(userData.session_id);
-        }
-        setLoading(false);
-    }, []);
+  const login = (username, session_id) => {
+    setUser(username);
+    setSessionId(session_id);
+    localStorage.setItem('user', JSON.stringify({ username, session_id }));
+  };
 
+  const logout = () => {
+    setUser(null);
+    setSessionId(null);
+    localStorage.removeItem('user');
+  };
 
-    const login = async (username, password) => {
-        setUser(null);
-        setSessionId(null);
-       localStorage.setItem('user',JSON.stringify({username, session_id}));
-    }; 
-
-    const logout = () => {
-        localStorage.removeItem('user');
-        setUser(null);
-        setSessionId(null);
-    }; 
-
-
-return (
-
-    <AuthContext.Provider value={{user, sessionId, loading, login, logout}}>
-        {children}
+  return (
+    <AuthContext.Provider value={{ user, sessionId, login, logout, loading }}>
+      {children}
     </AuthContext.Provider>
   );
 };
