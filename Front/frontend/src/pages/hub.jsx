@@ -237,9 +237,6 @@ const Hub = () => {
                 {/* Divider */}
                 <div className="flex items-center justify-center gap-4 my-4">
                   <div className="h-px bg-gradient-to-r from-transparent to-[#8B7355]/40 flex-1" />
-                  <svg className="w-4 h-4 text-[#8B7355]/80" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 3L14 9H20L15 13L17 19L12 15L7 19L9 13L4 9H10L12 3Z" />
-                  </svg>
                   <div className="h-px bg-gradient-to-l from-transparent to-[#8B7355]/40 flex-1" />
                 </div>
 
@@ -251,14 +248,9 @@ const Hub = () => {
                   {loading ? (
                     <span className="animate-spin">⚙️</span>
                   ) : (
-                    <>
-                      <svg className="w-5 h-5 text-white/80" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                      </svg>
-                      <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
-                        {isLogin ? "Se connecter" : "S'inscrire"}
-                      </span>
-                    </>
+                    <span className="drop-shadow-[0_1px_0_rgba(255,255,255,0.35)]">
+                      {isLogin ? "Se connecter" : "S'inscrire"}
+                    </span>
                   )}
                 </button>
 

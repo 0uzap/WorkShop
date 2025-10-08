@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Background from "../Background";
 import GreekFrise from "../components/GreekFrise";
 import GameTimer from "../components/GameTimer";
-
+import Chat from "../components/Chat";
 import { Heart, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
 const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
   const navigate = useNavigate();
+  const [sessionId, setSessionId] = useState(null);
+  const [currentUser, setCurrentUser] = useState('');
   const [answers, setAnswers] = useState({});
   const [hints, setHints] = useState({});
   const [validatedAnswers, setValidatedAnswers] = useState({});
@@ -88,10 +90,40 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
     setHints({...hints, [currentPuzzle.id]: !hints[currentPuzzle.id as keyof typeof hints]});
   };
 
+
+
+ 
+  useEffect(() => {
+    // Récupérer les infos utilisateur depuis localStorage
+    const storedUser = localStorage.getItem('user');
+    console.log('Stored user:', storedUser);
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        const username = userData.username || userData.name || 'Anonyme';
+        console.log('Setting currentUser to:', username);
+        setCurrentUser(username);
+        
+        // Récupérer le session_id depuis l'objet user
+        if (userData.session_id) {
+          console.log('Setting sessionId to:', userData.session_id);
+          setSessionId(userData.session_id);
+        } else {
+          console.log("Aucune session trouvée dans les données utilisateur");
+        }
+      } catch (e) {
+        console.log('Setting currentUser to storedUser string:', storedUser);
+        setCurrentUser(storedUser);
+      }
+    } else {
+      console.log("Aucun utilisateur trouvé dans localStorage");
+    }
+  }, []);
+
   return (
     <>
       <GameTimer onTimeUp={() => setGameOver(true)} />
-      
+
       <Background>
         <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
         <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
@@ -268,6 +300,12 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
           </div>
         )}
       </div>
+
+      {/* Chat Component - Always render with fallback values for debugging */}
+      <Chat 
+        sessionId={sessionId || 'debug-session'} 
+        currentUser={currentUser || 'Anonyme'} 
+      />
 
       </Background>
     </>

@@ -7,7 +7,7 @@ import PageArtsCreatifs from './pages/pagesArtsCreatifs.jsx'
 import PageCommerceIndustrie from './pages/pageCommerceIndustrie.jsx'
 import PageTourisme from './pages/PageTourisme.jsx'
 import PageEnvironnement from './pages/pageEnvironnement.jsx'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './Contexts/AuthContext'
 import Lobby from './components/Lobby.jsx'
 function App() {
   return (
