@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from '../Background.jsx';
-import GreekFrise from '../components/GreekFrise.js';
+import GreekFrise from '../components/GreekFrise';
 import { Leaf, Lock, Unlock, CheckCircle, XCircle, Trophy } from 'lucide-react';
 import Chat from '../components/Chat.jsx';
 

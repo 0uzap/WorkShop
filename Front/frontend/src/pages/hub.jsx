@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Background from "../Background.jsx";
 import GreekColumn from "../components/GreekColumn.jsx";
-import GreekFrise from "../components/GreekFrise.jsx";
+import GreekFrise from "../components/GreekFrise.tsx";
 import PlayerSlot from "../components/PlayerSlot.jsx";
 
 const FRIESE_HEIGHT = 48;   // Keep in sync with GreekFrise height
