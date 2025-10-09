@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X, Users } from 'lucide-react';
 
-const Chat = ({sessionId, currentUser}) => {
+const Chat = ({sessionId, currentUser, anchor = 'br' , frise = 40 , gap = 16}) => {
 
     const[isOpen,setIsOpen] = useState(false);
     const[messages,setMessages] = useState([]);
@@ -10,7 +10,21 @@ const Chat = ({sessionId, currentUser}) => {
     const[error, setError] = useState(null);
     const messagesEndRef = useRef(null);
     const chatIntervalRef = useRef(null);
+    
 
+    const cornerStyle = (() => {
+      const top    = `calc(${frise}px + max(${gap}px, env(safe-area-inset-top)))`;
+      const bottom = `calc(${frise}px + max(${gap}px, env(safe-area-inset-bottom)))`;
+  
+      switch (anchor) {
+        case 'bl': return { position: 'fixed', left: `${gap}px`,  bottom, zIndex: 40 };
+        case 'tl': return { position: 'fixed', left: `${gap}px`,  top,    zIndex: 40 };
+        case 'tr': return { position: 'fixed', right: `${gap}px`, top,    zIndex: 40 };
+        case 'br':
+        default:   return { position: 'fixed', right: `${gap}px`, bottom, zIndex: 40 };
+      }
+    })();
+  
     const fetchMessages = async () => {
         // Ne pas faire de requête si pas de vrai sessionId
         if (!sessionId || sessionId === 'debug-session') {
@@ -124,6 +138,7 @@ const Chat = ({sessionId, currentUser}) => {
           {/* Bouton flottant pour ouvrir le chat */}
           <button
             onClick={() => setIsOpen(true)}
+            style={cornerStyle}
             className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white shadow-lg hover:scale-105 transition-all flex items-center justify-center ${
               isOpen ? 'hidden' : 'block'
             }`}
@@ -137,7 +152,8 @@ const Chat = ({sessionId, currentUser}) => {
     
           {/* Fenêtre de chat */}
           <div
-            className={`fixed bottom-6 right-6 z-40 w-96 h-[500px] bg-white rounded-2xl shadow-2xl border-2 border-[#8B7355]/20 flex flex-col transition-all duration-300 transform ${
+            style={cornerStyle}
+            className={`fixed z-40 w-96 h-[500px] bg-white rounded-2xl shadow-2xl border-2 border-[#8B7355]/20 flex flex-col transition-all duration-300 transform ${
               isOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0 pointer-events-none'
             }`}
           >

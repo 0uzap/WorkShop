@@ -237,18 +237,21 @@ def player_ready(request):
             data = json.loads(request.body)
             session_id = data.get('session_id')
             user_id = data.get('user_id')
-            print(f"📝 Données reçues - session_id: {session_id}, user_id: {user_id}")
+            ready_status = data.get('ready')  # ⬅️ GET the ready value from frontend
+            
+            print(f"📝 Données reçues - session_id: {session_id}, user_id: {user_id}, ready: {ready_status}")
 
             session = Session.objects.get(id=session_id)
             player = Player.objects.get(session=session, user__id=user_id)
 
-            player.ready = True
+            player.ready = ready_status  # ⬅️ USE the value from frontend
             player.save()
-            print(f"✅ Joueur {player.user.username} marqué comme prêt")
+            print(f"✅ Joueur {player.user.username} ready status: {player.ready}")
 
             return JsonResponse({
                 "status": "success",
-                "message": f"Utilisateur {player.user.username} est prêt",
+                "message": f"Utilisateur {player.user.username} ready status updated",
+                "ready": player.ready  # ⬅️ Return the new status
             })
 
         except Session.DoesNotExist:
@@ -263,7 +266,6 @@ def player_ready(request):
 
     return JsonResponse({"status": "error", "message": "Méthode non autorisée"}, status=405)
 
-
 # views.py - Add this new endpoint
 @csrf_exempt
 def session_status(request):
@@ -277,6 +279,7 @@ def session_status(request):
             
             players_list = [{
                 'id': p.user.id,
+                'user_id': p.user.id,
                 'username': p.user.username,
                 'ready': p.ready
             } for p in players]

@@ -128,6 +128,7 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
         <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
         <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
 
+    
       {gameOver && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
           <div className="bg-white rounded-3xl p-8 text-center max-w-md">
@@ -302,11 +303,12 @@ const PageSante = ({ onComplete }: { onComplete?: () => void }) => {
       </div>
 
       {/* Chat Component - Always render with fallback values for debugging */}
-      <Chat 
-        sessionId={sessionId || 'debug-session'} 
-        currentUser={currentUser || 'Anonyme'} 
-      />
-
+     
+        <Chat
+          sessionId={sessionId || 'debug-session'}
+          currentUser={currentUser || 'Anonyme'} anchor="br" frise={40}
+        />
+     
       </Background>
     </>
   );

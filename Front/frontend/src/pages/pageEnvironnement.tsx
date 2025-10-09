@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Background from '../Background.jsx';
-import GreekFrise from '../components/GreekFrise.jsx';
+import GreekFrise from '../components/GreekFrise.js';
 import { Leaf, Lock, Unlock, CheckCircle, XCircle, Trophy } from 'lucide-react';
+import Chat from '../components/Chat.jsx';
 
 const PageEnvironnement = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ const PageEnvironnement = () => {
   const [validatedAnswers, setValidatedAnswers] = useState({});
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
   const [showFinalSuccess, setShowFinalSuccess] = useState(false);
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const sessionId = currentUser.session_id;
 
   const puzzles = [
     {
@@ -36,11 +39,11 @@ const PageEnvironnement = () => {
 
   const currentPuzzle = puzzles[currentPuzzleIndex];
 
-  const normalizeAnswer = (answer) => {
+  const normalizeAnswer = (answer: string) => {
     return answer.toLowerCase().trim().replace(/[^a-zàâäéèêëïîôùûüÿœæç]/gi, '');
   };
 
-  const checkAnswer = (userAnswer, correctAnswer, alternativeAnswers = []) => {
+  const checkAnswer = (userAnswer: string, correctAnswer: string, alternativeAnswers: string[] = []) => {
     const normalized = normalizeAnswer(userAnswer);
     const correct = normalizeAnswer(correctAnswer);
     const alternatives = alternativeAnswers.map(a => normalizeAnswer(a));
@@ -49,7 +52,7 @@ const PageEnvironnement = () => {
   };
 
   const handleSubmit = () => {
-    const userAnswer = answers[currentPuzzle.id] || '';
+    const userAnswer = answers[currentPuzzle.id as keyof typeof answers] || '';
     
     if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
       setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: true});
@@ -70,13 +73,14 @@ const PageEnvironnement = () => {
     }
   };
 
+  {/*
   const handleFinalComplete = () => {
-    // Ici vous pouvez rediriger vers une page de fin ou enregistrer le score
-    navigate('/victory'); // ou '/home' ou toute autre page
+    
+    navigate('/victory'); 
   };
-
+  */}
   const toggleHint = () => {
-    setHints({...hints, [currentPuzzle.id]: !hints[currentPuzzle.id]});
+    setHints({...hints, [currentPuzzle.id as keyof typeof hints]: !hints[currentPuzzle.id as keyof typeof hints]});
   };
 
   return (
@@ -116,15 +120,15 @@ const PageEnvironnement = () => {
         </div>
 
         <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
-          validatedAnswers[currentPuzzle.id] === true ? 'border-green-600 shadow-green-600/20' :
-          validatedAnswers[currentPuzzle.id] === false ? 'border-red-600 shake' : ''
+          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? 'border-green-600 shadow-green-600/20' :
+          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false ? 'border-red-600 shake' : ''
         }`}>
           <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold text-white">
                 {currentPuzzle.title}
               </h2>
-              {validatedAnswers[currentPuzzle.id] === true ? (
+              {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? (
                 <Unlock className="w-6 h-6 text-white" />
               ) : (
                 <Lock className="w-6 h-6 text-white/60" />
@@ -150,13 +154,13 @@ const PageEnvironnement = () => {
             <div className="flex gap-3 mb-4">
               <input
                 type="text"
-                value={answers[currentPuzzle.id] || ''}
+                value={answers[currentPuzzle.id as keyof typeof answers] || ''}
                 onChange={(e) => setAnswers({...answers, [currentPuzzle.id]: e.target.value})}
                 onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                disabled={validatedAnswers[currentPuzzle.id] === true}
+                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
                 placeholder="Votre réponse..."
                 className={`flex-1 px-4 py-3 rounded-xl border-2 bg-white focus:outline-none focus:ring-2 transition-all ${
-                  validatedAnswers[currentPuzzle.id] === true
+                  validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true
                     ? 'border-green-500 bg-green-50'
                     : 'border-[#C4B5A0] focus:ring-[#8B7355]/30 focus:border-[#8B7355]'
                 }`}
@@ -164,7 +168,7 @@ const PageEnvironnement = () => {
               
               <button
                 onClick={handleSubmit}
-                disabled={validatedAnswers[currentPuzzle.id] === true}
+                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
                 className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 Valider
@@ -179,7 +183,7 @@ const PageEnvironnement = () => {
               </button>
             </div>
 
-            {hints[currentPuzzle.id] && (
+            {hints[currentPuzzle.id as keyof typeof hints] && (
               <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
                 <p className="text-[#8B7355] flex items-center gap-2">
                   <span className="text-xl">💡</span>
@@ -188,13 +192,13 @@ const PageEnvironnement = () => {
               </div>
             )}
 
-            {validatedAnswers[currentPuzzle.id] === true && (
+            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true && (
               <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-semibold">Bravo ! La nature vous révèle ses secrets !</span>
               </div>
             )}
-            {validatedAnswers[currentPuzzle.id] === false && (
+            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false && (
               <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
                 <XCircle className="w-5 h-5" />
                 <span>Pas encore, réessayez...</span>
@@ -223,18 +227,20 @@ const PageEnvironnement = () => {
                 <span className="text-3xl">🌿</span>
                 <span className="text-3xl">🏺</span>
               </div>
-              <button
-                onClick={handleFinalComplete}
-                className="px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-[#5C4033] font-bold text-lg rounded-xl hover:from-[#FFD700] hover:to-[#D4AF37] transition-all shadow-xl"
-              >
+              {/*
+                <button
+                  onClick={handleFinalComplete}
+                  className="px-8 py-4 bg-gradient-to-r from-[#D4AF37] to-[#FFD700] text-[#5C4033] font-bold text-lg rounded-xl hover:from-[#FFD700] hover:to-[#D4AF37] transition-all shadow-xl"
+                >
                 Terminer l'Aventure
               </button>
+              */}
             </div>
           </div>
         )}
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
           25% { transform: translateX(-5px); }
@@ -244,6 +250,11 @@ const PageEnvironnement = () => {
           animation: shake 0.3s ease-in-out;
         }
       `}</style>
+        <Chat
+          sessionId={sessionId || 'debug-session'}
+          currentUser={currentUser || 'Anonyme'} anchor="br" frise={40}
+        />
+     
     </Background>
   );
 };
