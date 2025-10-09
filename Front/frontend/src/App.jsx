@@ -7,7 +7,7 @@ import PageArtsCreatifs from './pages/pagesArtsCreatifs.tsx'
 import PageCommerceIndustrie from './pages/pageCommerceIndustrie.tsx'
 import PageTourisme from './pages/PageTourisme.tsx'
 import PageEnvironnement from './pages/pageEnvironnement.tsx'
-import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { AuthProvider, useAuth } from './Contexts/AuthContext'
 import Lobby from './components/Lobby.jsx'
 function App() {
   return (

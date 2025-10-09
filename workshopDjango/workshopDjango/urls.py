@@ -31,5 +31,7 @@ urlpatterns = [
     path('api/player-ready/', views.player_ready, name='player_ready'),
     path('api/start-game/', views.start_game, name='start_game'),
     path('api/session-status/', views.session_status, name='session_status'),
+    path('api/send-message/', views.send_message, name='send_message'),
+    path('api/get-messages/<str:session_id>/', views.get_messages, name='get_messages'),
 
 ]

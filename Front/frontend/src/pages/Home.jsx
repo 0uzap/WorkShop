@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Background from "../Background.jsx";
-import GreekFrise from "../components/GreekFrise.jsx";
+import GreekFrise from "../components/GreekFrise";
 import PlayerSlot from "../components/PlayerSlot.jsx";
 
 function Home() {

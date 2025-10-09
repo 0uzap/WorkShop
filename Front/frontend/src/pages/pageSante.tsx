@@ -56,6 +56,15 @@ const PageSante: React.FC<PageSanteProps> = ({ onComplete }) => {
 
   // Données
   const puzzles: Puzzle[] = [
+  const [sessionId, setSessionId] = useState(null);
+  const [currentUser, setCurrentUser] = useState('');
+  const [answers, setAnswers] = useState({});
+  const [hints, setHints] = useState({});
+  const [validatedAnswers, setValidatedAnswers] = useState({});
+  const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
+  const [showTransition, setShowTransition] = useState(false);
+  const [gameOver, setGameOver] = useState(false);
+  const puzzles = [
     {
       id: "hippocrate",
       title: "Le Père de la Médecine",
@@ -174,9 +183,82 @@ const PageSante: React.FC<PageSanteProps> = ({ onComplete }) => {
     [validatedAnswers]
   );
 
+
+ 
+  useEffect(() => {
+    // Récupérer les infos utilisateur depuis localStorage
+    const storedUser = localStorage.getItem('user');
+    console.log('Stored user:', storedUser);
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        const username = userData.username || userData.name || 'Anonyme';
+        console.log('Setting currentUser to:', username);
+        setCurrentUser(username);
+        
+        // Récupérer le session_id depuis l'objet user
+        if (userData.session_id) {
+          console.log('Setting sessionId to:', userData.session_id);
+          setSessionId(userData.session_id);
+        } else {
+          console.log("Aucune session trouvée dans les données utilisateur");
+        }
+      } catch (e) {
+        console.log('Setting currentUser to storedUser string:', storedUser);
+        setCurrentUser(storedUser);
+      }
+    } else {
+      console.log("Aucun utilisateur trouvé dans localStorage");
+    }
+  }, []);
+
   return (
     <>
       <GameTimer onTimeUp={() => setGameOver(true)} />
+
+      <Background>
+        <GreekFrise position="top" height={40} opacity={0.8} tileWidth={100} />
+        <GreekFrise position="bottom" height={40} opacity={0.8} tileWidth={100} />
+
+    
+      {gameOver && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-white rounded-3xl p-8 text-center max-w-md">
+            <div className="text-6xl mb-4">⏰</div>
+            <h2 className="text-3xl font-bold text-[#5C4033] mb-4">
+              Temps écoulé !
+            </h2>
+            <p className="text-[#8B7355] mb-6">
+              Les dieux ne vous ont pas accordé assez de temps...
+              L'Olympe reste fermé pour cette fois.
+            </p>
+             <button
+               onClick={() => {
+                 localStorage.removeItem('gameStartTime');
+                 localStorage.removeItem('user');
+                 navigate('/hub');
+               }}
+               className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all"
+             >
+               Réessayer
+             </button>
+          </div>
+        </div>
+      )}
+      <div className="relative z-10 w-full max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Heart className="w-8 h-8 text-[#8B7355]" />
+            <h1 className="text-4xl md:text-5xl font-bold text-[#5C4033]">
+              Santé & Médecine
+            </h1>
+            <Heart className="w-8 h-8 text-[#8B7355]" />
+          </div>
+          <p className="text-[#8B7355] text-lg">
+            Les secrets d'Asclépios vous attendent
+          </p>
+        </div>
 
       <Background>
         <GreekFrise
@@ -493,6 +575,14 @@ const PageSante: React.FC<PageSanteProps> = ({ onComplete }) => {
         .shake { animation: shake 0.3s ease-in-out; }
         .heroTitle { margin: 0; padding: 0; line-height: 1; }
       `}</style>
+      {/* Chat Component - Always render with fallback values for debugging */}
+     
+        <Chat
+          sessionId={sessionId || 'debug-session'}
+          currentUser={currentUser || 'Anonyme'} anchor="br" frise={40}
+        />
+     
+      </Background>
     </>
   );
 };
