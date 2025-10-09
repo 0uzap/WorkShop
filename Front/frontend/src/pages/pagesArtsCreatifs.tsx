@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Background from "../Background.jsx";
-import GreekFrise from "../components/GreekFrise.js";
+import GreekFrise from "../components/GreekFrise";
+import Chat from "../components/Chat.jsx";
 import { Palette, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from "lucide-react";
 
-// 🖼️ image + Dialog
-import atelier from "../assets/atelier.png";
+// 🖼️ Image + Dialog
+import atelierImage from "../assets/atelier.png";
 import { Dialog, DialogContent } from "../components/dialog";
 
 /** Types */
@@ -27,17 +28,19 @@ const FRIEZE_HEIGHT = 56;
 const PageArtsCreatifs: React.FC = () => {
   const navigate = useNavigate();
 
+  // User & session
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const sessionId = currentUser.session_id;
+
   // States
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [validatedAnswers, setValidatedAnswers] = useState<Record<string, boolean | undefined>>({});
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState<number>(0);
   const [showTransition, setShowTransition] = useState<boolean>(false);
-
-  // ✅ pop-up contrôlée par les hotspots de l'image
   const [isPuzzleOpen, setIsPuzzleOpen] = useState<boolean>(false);
 
-  // Data
+  // Puzzles data
   const puzzles: Puzzle[] = [
     {
       id: "muses",
@@ -51,42 +54,12 @@ const PageArtsCreatifs: React.FC = () => {
     },
     {
       id: "dionysos",
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Background from '../Background.jsx';
-import GreekFrise from '../components/GreekFrise';
-import { Palette, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
-import Chat from '../components/Chat.jsx';
-
-const PageArtsCreatifs = () => {
-  const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
-  const [hints, setHints] = useState({});
-  const [validatedAnswers, setValidatedAnswers] = useState({});
-  const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
-  const [showTransition, setShowTransition] = useState(false);
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const sessionId = currentUser.session_id;
-
-
-  const puzzles = [
-    {
-      id: 'muses',
-      title: "Les Inspiratrices Divines",
-      question: "Neuf sœurs m'entourent et inspirent poètes, peintres et danseurs. Qui sommes-nous ?",
-      answer: "les muses",
-      alternativeAnswers: ["muses"],
-      hint: "Filles de Zeus et Mnémosyne",
-      type: "text"
-    },
-    {
-      id: 'dionysos',
       title: "Le Dieu de la Fête",
       question: "Rébus : Dio (Jojo's) + Nid d'oiseaux + Z (la lettre) + des os",
       answer: "dionysos",
       hint: "Dieu du vin et de la fête",
       type: "rebus",
-      visual: ["Dio", "🪹 ", "Z ", "🦴 "],
+      visual: ["🎮 Dio", "🪹 Nid", "Z", "🦴 Os"],
     },
     {
       id: "intrus",
@@ -122,18 +95,21 @@ const PageArtsCreatifs = () => {
     const userAnswer = answers[currentPuzzle.id] || "";
 
     if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
-      setValidatedAnswers((prev) => ({ ...prev, [currentPuzzle.id]: true }));
+      setValidatedAnswers((prev) => {
+        const next = { ...prev, [currentPuzzle.id]: true };
 
-      setTimeout(() => {
-        if (currentPuzzleIndex < puzzles.length - 1) {
-          setCurrentPuzzleIndex((i) => i + 1);
-        } else {
+        // Check if all puzzles solved
+        const allSolved = puzzles.every((p) => next[p.id] === true);
+        if (allSolved) {
           setShowTransition(true);
           setTimeout(() => navigate("/commerce-industrie"), 2000);
         }
-      }, 1500);
-      // ferme la pop-up après une petite latence si tu veux :
-      // setTimeout(() => setIsPuzzleOpen(false), 800);
+
+        return next;
+      });
+
+      // Close popup after success
+      setTimeout(() => setIsPuzzleOpen(false), 900);
     } else {
       setValidatedAnswers((prev) => ({ ...prev, [currentPuzzle.id]: false }));
       setTimeout(() => {
@@ -145,7 +121,6 @@ const PageArtsCreatifs = () => {
   const toggleHint = (): void =>
     setHints((prev) => ({ ...prev, [currentPuzzle.id]: !prev[currentPuzzle.id] }));
 
-  /** Events */
   const onFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     handleSubmit();
@@ -155,13 +130,11 @@ const PageArtsCreatifs = () => {
     if (e.key === "Enter") handleSubmit();
   };
 
-  /** Hotspots */
   const openPuzzleAt = (index: number) => {
     setCurrentPuzzleIndex(index);
     setIsPuzzleOpen(true);
   };
 
-  // Progress dots (optionnel : colorer ceux déjà validés)
   const solvedIds = useMemo(
     () =>
       new Set(
@@ -172,7 +145,6 @@ const PageArtsCreatifs = () => {
     [validatedAnswers]
   );
 
-  /** Render */
   return (
     <Background>
       <GreekFrise position="top" tilesPerViewport={6.5} height={FRIEZE_HEIGHT} />
@@ -180,27 +152,25 @@ const PageArtsCreatifs = () => {
 
       <div className="relative z-10 w-full max-w-5xl">
         {/* Header */}
-        <header>
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4 not-prose">
-              <Palette size={50} className="text-[#8B7355] relative top-1" />
-              <h1 className="heroTitle text-[65px] font-bold text-[#5C4033] leading-[1]">
-                Arts Créatifs
-              </h1>
-              <Palette size={50} className="text-[#8B7355] relative top-1" />
-            </div>
-            <p className="text-[#8B7355] text-[20px]">
-              Les Muses vous guident vers l'inspiration divine
-            </p>
+        <header className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Palette size={50} className="text-[#8B7355] relative top-1" />
+            <h1 className="heroTitle text-[65px] font-bold text-[#5C4033] leading-[1]">
+              Arts Créatifs
+            </h1>
+            <Palette size={50} className="text-[#8B7355] relative top-1" />
           </div>
+          <p className="text-[#8B7355] text-[20px]">
+            Les Muses vous guident vers l'inspiration divine
+          </p>
         </header>
 
-        {/* 🖼️ Image centrée + hotspots */}
+        {/* 🖼️ Image with clickable zones */}
         <div className="w-full flex justify-center mb-8">
           <div className="relative inline-block">
             <img
-              src={atelier}
-              alt="Scène de l'atelier"
+              src={atelierImage}
+              alt="Scène de l'atelier artistique"
               className="
                 block mx-auto h-auto
                 max-h-[82vh]
@@ -209,96 +179,38 @@ const PageArtsCreatifs = () => {
               "
             />
 
-            {/* 🔘 Zone 1 → énigme 0 (ajuste les % selon ton image) */}
+            {/* Zone 1 → Muses */}
             <button
               onClick={() => openPuzzleAt(0)}
-              className="absolute bg-transparent border-hidden rounded-md cursor-default"
+              className="absolute bg-transparent border-2 border-transparent hover:border-yellow-400/50 rounded-md cursor-pointer transition"
               style={{ left: "2%", top: "32%", width: "14%", height: "60%" }}
-              aria-label="Ouvrir l'énigme 1"
+              aria-label="Ouvrir l'énigme Les Muses"
             />
 
-            {/* 🔘 Zone 2 → énigme 1 */}
+            {/* Zone 2 → Dionysos */}
             <button
               onClick={() => openPuzzleAt(1)}
-              className="absolute bg-transparent border-hidden rounded-md cursor-default"
+              className="absolute bg-transparent border-2 border-transparent hover:border-yellow-400/50 rounded-md cursor-pointer transition"
               style={{ left: "48%", top: "74%", width: "5%", height: "14%" }}
-              aria-label="Ouvrir l'énigme 2"
+              aria-label="Ouvrir l'énigme Dionysos"
             />
 
-            {/* 🔘 Zone 3 → énigme 2 */}
+            {/* Zone 3 → Intrus */}
             <button
               onClick={() => openPuzzleAt(2)}
-              className="absolute bg-transparent border-hidden rounded-md cursor-default"
+              className="absolute bg-transparent border-2 border-transparent hover:border-yellow-400/50 rounded-md cursor-pointer transition"
               style={{ left: "93.8%", top: "38%", width: "4%", height: "16%" }}
-              aria-label="Ouvrir l'énigme 3"
+              aria-label="Ouvrir l'énigme Intrus"
             />
 
-            {/* Hint overlay */}
+            {/* Help text */}
             <div className="absolute bottom-3 left-3 bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
-              Cliquez sur les zones invisibles de l’image pour ouvrir une énigme.
+              Cliquez sur les zones de l'image pour ouvrir une énigme.
             </div>
           </div>
-  const normalizeAnswer = (answer : string) => {
-    return answer.toLowerCase().trim().replace(/[^a-zàâäéèêëïîôùûüÿœæç]/gi, '');
-  };
-
-  const checkAnswer = (userAnswer: string, correctAnswer: string, alternativeAnswers: string[] = []) => {
-    const normalized = normalizeAnswer(userAnswer);
-    const correct = normalizeAnswer(correctAnswer);
-    const alternatives = alternativeAnswers.map(a => normalizeAnswer(a));
-    
-    return normalized === correct || alternatives.includes(normalized);
-  };
-
-  const handleSubmit = () => {
-    const userAnswer = answers[currentPuzzle.id as keyof typeof answers] || '';
-    
-    if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
-      setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: true});
-      
-      setTimeout(() => {
-        if (currentPuzzleIndex < puzzles.length - 1) {
-          setCurrentPuzzleIndex(currentPuzzleIndex + 1);
-        } else {
-          setShowTransition(true);
-          setTimeout(() => {
-            navigate('/commerce-industrie');
-          }, 2000);
-        }
-      }, 1500);
-    } else {
-      setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: false});
-      setTimeout(() => {
-        setValidatedAnswers(prev => ({...prev, [currentPuzzle.id]: undefined}));
-      }, 2000);
-    }
-  };
-
-  const toggleHint = () => {
-    setHints({...hints, [currentPuzzle.id as keyof typeof hints]: !hints[currentPuzzle.id as keyof typeof hints]});
-  };
-
-  return (
-    <Background>
-      <GreekFrise position="top" />
-      <GreekFrise position="bottom" />
-      
-      <div className="relative z-10 w-full max-w-4xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Palette className="w-8 h-8 text-[#8B7355]" />
-            <h1 className="text-4xl md:text-5xl font-bold text-[#5C4033]">
-              Arts Créatifs
-            </h1>
-            <Palette className="w-8 h-8 text-[#8B7355]" />
-          </div>
-          <p className="text-[#8B7355] text-lg">
-            Les Muses vous guident vers l'inspiration divine
-          </p>
         </div>
 
-        {/* Progress Indicator */}
+        {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex justify-center gap-2 mb-4">
             {puzzles.map((p, index) => (
@@ -319,103 +231,15 @@ const PageArtsCreatifs = () => {
           </p>
         </div>
 
-        {/* Transition (fin) */}
-        {/* Main Puzzle Card - Même structure que PageSante */}
-        <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
-          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? 'border-green-600 shadow-green-600/20' :
-          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false ? 'border-red-600 shake' : ''
-        }`}>
-          <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">
-                {currentPuzzle.title}
-              </h2>
-              {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? (
-                <Unlock className="w-6 h-6 text-white" />
-              ) : (
-                <Lock className="w-6 h-6 text-white/60" />
-              )}
-            </div>
-          </div>
-
-          <div className="p-6">
-            <p className="text-[#5C4033] text-lg mb-6 font-medium">
-              {currentPuzzle.question}
-            </p>
-
-            {currentPuzzle.type === 'rebus' && currentPuzzle.visual && (
-              <div className="flex flex-wrap gap-3 mb-6 justify-center bg-[#F5E6D3] rounded-xl p-4">
-                {currentPuzzle.visual.map((item, idx) => (
-                  <div key={idx} className="text-2xl font-bold text-[#5C4033] px-4 py-2 bg-white rounded-lg shadow-md">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            <div className="flex gap-3 mb-4">
-              <input
-                type="text"
-                value={answers[currentPuzzle.id as keyof typeof answers] || ''}
-                onChange={(e) => setAnswers({...answers, [currentPuzzle.id]: e.target.value})}
-                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
-                placeholder="Votre réponse..."
-                className={`flex-1 px-4 py-3 rounded-xl border-2 bg-white focus:outline-none focus:ring-2 transition-all ${
-                  validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-[#C4B5A0] focus:ring-[#8B7355]/30 focus:border-[#8B7355]'
-                }`}
-              />
-              
-              <button
-                onClick={handleSubmit}
-                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
-                className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                Valider
-              </button>
-              
-              <button
-                onClick={toggleHint}
-                className="px-4 py-3 bg-[#F5E6D3] text-[#5C4033] rounded-xl hover:bg-[#E8D4B8] transition-all shadow-md"
-                title="Indice"
-              >
-                💡
-              </button>
-            </div>
-
-            {hints[currentPuzzle.id as keyof typeof hints] && (
-              <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
-                <p className="text-[#8B7355] flex items-center gap-2">
-                  <span className="text-xl">💡</span>
-                  <span className="font-medium">Indice : {currentPuzzle.hint}</span>
-                </p>
-              </div>
-            )}
-
-            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true && (
-              <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Magnifique ! Vous avez trouvé !</span>
-              </div>
-            )}
-            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false && (
-              <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
-                <XCircle className="w-5 h-5" />
-                <span>Ce n'est pas correct. Essayez encore...</span>
-              </div>
-            )}
-          </div>
-        </div>
-
+        {/* Transition overlay */}
         {showTransition && (
           <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
             <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
               <div className="text-6xl mb-4">🎨</div>
               <h2 className="text-3xl font-bold text-[#5C4033] mb-4">Brillant !</h2>
               <p className="text-[#8B7355] mb-6">
-                Les Muses sont fières de vous ! Direction le Commerce & l&apos;Industrie...
+                Les Muses sont fières de vous !
+                Direction le Commerce & l'Industrie...
               </p>
               <div className="flex justify-center">
                 <ArrowRight className="w-8 h-8 text-[#8B7355] animate-pulse" />
@@ -425,8 +249,16 @@ const PageArtsCreatifs = () => {
         )}
       </div>
 
-      {/* 🪟 POP-UP avec la carte Q/R/Indice/Boutons */}
-      <Dialog open={isPuzzleOpen} onOpenChange={(open) => setIsPuzzleOpen(open)}>
+      {/* Chat component */}
+      <Chat
+        sessionId={sessionId || 'debug-session'}
+        currentUser={currentUser.username || 'Anonyme'}
+        anchor="br"
+        frise={FRIEZE_HEIGHT}
+      />
+
+      {/* Puzzle Dialog */}
+      <Dialog open={isPuzzleOpen} onOpenChange={setIsPuzzleOpen}>
         <DialogContent
           className="
             w-[92vw] sm:w-[42rem] max-w-[42rem]
@@ -437,12 +269,12 @@ const PageArtsCreatifs = () => {
         >
           <section
             aria-labelledby="puzzle-title"
-            className={` bg-[#DDD1BC] mx-auto bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-[#8B7355]/20 overflow-hidden transition-all duration-300
+            className={`bg-[#DDD1BC] mx-auto bg-white/90 backdrop-blur rounded-2xl shadow-xl border border-[#8B7355]/20 overflow-hidden transition-all duration-300
               ${
                 validatedAnswers[currentPuzzle.id] === true
                   ? "border-green-500 ring-1 ring-green-500/30"
                   : validatedAnswers[currentPuzzle.id] === false
-                  ? "border-red-500 ring-1 ring-red-500/30"
+                  ? "border-red-500 ring-1 ring-red-500/30 shake"
                   : "hover:shadow-2xl"
               }`}
           >
@@ -453,16 +285,15 @@ const PageArtsCreatifs = () => {
                   {currentPuzzle.title}
                 </h2>
                 {validatedAnswers[currentPuzzle.id] === true ? (
-                  <Unlock className="w-6 h-6 text-white" aria-hidden />
+                  <Unlock className="w-6 h-6 text-white" />
                 ) : (
-                  <Lock className="w-6 h-6 text-white/80" aria-hidden />
+                  <Lock className="w-6 h-6 text-white/80" />
                 )}
               </div>
             </div>
 
-            {/* Corps */}
+            {/* Body */}
             <form onSubmit={onFormSubmit} className="p-6 text-center text-xl" noValidate>
-              {/* barre de question avec fond plein */}
               <div className="bg-[#DDD1BC] rounded-lg px-4 py-3 mb-4">
                 <p className="text-[#5C4033] text-[19px] md:text-2xl leading-snug font-semibold">
                   {currentPuzzle.question}
@@ -483,21 +314,16 @@ const PageArtsCreatifs = () => {
               )}
 
               <div className="grid gap-2 mb-2">
-                <label htmlFor={`answer-${currentPuzzle.id}`} className="sr-only">
-                  Votre réponse
-                </label>
-
                 <input
                   id={`answer-${currentPuzzle.id}`}
                   type="text"
                   value={answers[currentPuzzle.id] || ""}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  onChange={(e) =>
                     setAnswers({ ...answers, [currentPuzzle.id]: e.target.value })
                   }
                   onKeyDown={onInputKeyDown}
                   disabled={validatedAnswers[currentPuzzle.id] === true}
                   placeholder="Votre réponse… (Entrée pour valider)"
-                  aria-invalid={validatedAnswers[currentPuzzle.id] === false}
                   className={`w-full h-[35px] text-[20px] placeholder:text-xl px-5 rounded-xl border-2 bg-white focus:outline-none focus:ring-4 transition
                     ${
                       validatedAnswers[currentPuzzle.id] === true
@@ -524,9 +350,6 @@ const PageArtsCreatifs = () => {
                     type="button"
                     onClick={toggleHint}
                     className="col-span-1 w-full h-[30px] text-[18px] md:text-lg px-4 bg-[#F5E6D3] text-[#5C4033] font-medium rounded-xl hover:bg-[#E8D4B8] focus:outline-none focus:ring-4 focus:ring-[#E8D4B8]/50 transition shadow-md"
-                    title="Afficher un indice"
-                    aria-controls={`hint-${currentPuzzle.id}`}
-                    aria-expanded={!!hints[currentPuzzle.id]}
                   >
                     💡 Indice
                   </button>
@@ -534,10 +357,7 @@ const PageArtsCreatifs = () => {
               </div>
 
               {hints[currentPuzzle.id] && (
-                <div
-                  id={`hint-${currentPuzzle.id}`}
-                  className="p-4 bg-[#FFF8DC] border border-[#D4AF37]/40 rounded-lg mb-1"
-                >
+                <div className="p-4 bg-[#FFF8DC] border border-[#D4AF37]/40 rounded-lg mb-1">
                   <p className="text-[#8B7355] flex items-center gap-2 justify-center">
                     <span className="text-xl">💡</span>
                     <span className="font-medium">Indice : {currentPuzzle.hint}</span>
@@ -548,13 +368,13 @@ const PageArtsCreatifs = () => {
               <div aria-live="polite" className="mt-2 space-y-2">
                 {validatedAnswers[currentPuzzle.id] === true && (
                   <div className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2 justify-center text-green-700">
-                    <CheckCircle className="w-5 h-5" aria-hidden />
+                    <CheckCircle className="w-5 h-5" />
                     <span className="font-semibold">Magnifique ! Vous avez trouvé !</span>
                   </div>
                 )}
                 {validatedAnswers[currentPuzzle.id] === false && (
                   <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 justify-center text-red-700">
-                    <XCircle className="w-5 h-5" aria-hidden />
+                    <XCircle className="w-5 h-5" />
                     <span>Ce n'est pas correct. Essayez encore…</span>
                   </div>
                 )}
@@ -565,25 +385,14 @@ const PageArtsCreatifs = () => {
       </Dialog>
 
       <style>{`
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        @keyframes shake { 
+          0%, 100% { transform: translateX(0); } 
+          25% { transform: translateX(-5px); } 
+          75% { transform: translateX(5px); } 
+        }
         .shake { animation: shake 0.3s ease-in-out; }
         .heroTitle { margin: 0; padding: 0; line-height: 1; }
       `}</style>
-      <style>{`
-        @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          75% { transform: translateX(5px); }
-        }
-        .shake {
-          animation: shake 0.3s ease-in-out;
-        }
-      `}</style>
-        <Chat
-          sessionId={sessionId || 'debug-session'}
-          currentUser={currentUser || 'Anonyme'} anchor="br" frise={40}
-        />
-     
     </Background>
   );
 };

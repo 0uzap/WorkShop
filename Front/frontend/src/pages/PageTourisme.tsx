@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Background from "../Background.jsx";
-import GreekFrise from "../components/GreekFrise.jsx";
+import GreekFrise from "../components/GreekFrise";
 import {
   Mountain,
   Lock,
@@ -10,11 +10,12 @@ import {
   XCircle,
   ArrowRight,
 } from "lucide-react";
+import Chat from "../components/Chat.jsx";
 
-// 🖼️ ton image
+// Image import
 import acropole from "../assets/acropole.png";
 
-// Composants de boîte de dialogue
+// Dialog components
 import { Dialog, DialogContent } from "../components/dialog";
 
 type PuzzleType = "text" | "rebus" | "choice";
@@ -35,7 +36,7 @@ const FRIEZE_HEIGHT = 56;
 const PageTourisme: React.FC = () => {
   const navigate = useNavigate();
 
-  /** States typés */
+  // Typed states
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [hints, setHints] = useState<Record<string, boolean>>({});
   const [validatedAnswers, setValidatedAnswers] = useState<
@@ -45,7 +46,10 @@ const PageTourisme: React.FC = () => {
   const [showTransition, setShowTransition] = useState<boolean>(false);
   const [isPuzzleOpen, setIsPuzzleOpen] = useState<boolean>(false);
 
-  /** Données */
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const sessionId = currentUser.session_id;
+
+  // Puzzle data
   const puzzles: Puzzle[] = [
     {
       id: "acropole",
@@ -64,48 +68,19 @@ const PageTourisme: React.FC = () => {
     },
     {
       id: "delphes",
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Background from '../Background.jsx';
-import GreekFrise from '../components/GreekFrise';
-import { Mountain, Lock, Unlock, CheckCircle, XCircle, ArrowRight } from 'lucide-react';
-import Chat from '../components/Chat.jsx';
-
-const PageTourisme = () => {
-  const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
-  const [hints, setHints] = useState({});
-  const [validatedAnswers, setValidatedAnswers] = useState({});
-  const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
-  const [showTransition, setShowTransition] = useState(false);
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  const sessionId = currentUser.session_id;
-
-  const puzzles = [
-    {
-      id: 'acropole',
-      title: "La Colline Sacrée",
-      question: "Je suis une colline couronnée de marbre, guettant Athènes depuis des millénaires. Qui suis-je ?",
-      answer: "acropole",
-      alternativeAnswers: ["l'acropole", "parthénon", "parthenon", "le parthénon"],
-      hint: "Citadelle d'Athènes",
-      type: "text"
-    },
-    {
-      id: 'delphes',
       title: "Le Site de l'Oracle",
       question: "Rébus : Dé + Elfe",
       answer: "delphes",
       alternativeAnswers: ["delphe"],
       hint: "Site de l'oracle d'Apollon",
       type: "rebus",
-      visual: ["🎲 ", "🧝 "],
+      visual: ["🎲 Dé", "🧝 Elfe"],
     },
   ];
 
   const currentPuzzle = puzzles[currentPuzzleIndex];
 
-  /** Utils */
+  // Utils
   const normalizeAnswer = (answer: string): string =>
     (answer ?? "")
       .toLowerCase()
@@ -123,7 +98,7 @@ const PageTourisme = () => {
     return normalized === correct || alternatives.includes(normalized);
   };
 
-  /** Handlers */
+  // Handlers
   const handleSubmit = (): void => {
     const userAnswer = answers[currentPuzzle.id] || "";
 
@@ -138,7 +113,7 @@ const PageTourisme = () => {
 
       setTimeout(() => {
         if (currentPuzzleIndex < puzzles.length - 1) {
-          // setCurrentPuzzleIndex((i) => i + 1);
+          setCurrentPuzzleIndex((i) => i + 1);
         } else {
           setShowTransition(true);
           setTimeout(() => navigate("/environnement"), 2000);
@@ -151,38 +126,6 @@ const PageTourisme = () => {
           ...prev,
           [currentPuzzle.id]: undefined,
         }));
-  const normalizeAnswer = (answer: string) => {
-    return answer.toLowerCase().trim().replace(/[^a-zàâäéèêëïîôùûüÿœæç]/gi, '');
-  };
-
-  const checkAnswer = (userAnswer: string, correctAnswer: string, alternativeAnswers: string[] = []) => {
-    const normalized = normalizeAnswer(userAnswer);
-    const correct = normalizeAnswer(correctAnswer);
-    const alternatives = alternativeAnswers.map(a => normalizeAnswer(a));
-    
-    return normalized === correct || alternatives.includes(normalized);
-  };
-
-  const handleSubmit = () => {
-    const userAnswer = answers[currentPuzzle.id as keyof typeof answers] || '';
-    
-    if (checkAnswer(userAnswer, currentPuzzle.answer, currentPuzzle.alternativeAnswers)) {
-      setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: true});
-      
-      setTimeout(() => {
-        if (currentPuzzleIndex < puzzles.length - 1) {
-          setCurrentPuzzleIndex(currentPuzzleIndex + 1);
-        } else {
-          setShowTransition(true);
-          setTimeout(() => {
-            navigate('/environnement');
-          }, 2000);
-        }
-      }, 1500);
-    } else {
-      setValidatedAnswers({...validatedAnswers, [currentPuzzle.id]: false});
-      setTimeout(() => {
-        setValidatedAnswers(prev => ({...prev, [currentPuzzle.id]: undefined}));
       }, 2000);
     }
   };
@@ -203,7 +146,7 @@ const PageTourisme = () => {
     if (e.key === "Enter") handleSubmit();
   };
 
-  /** Hotspots → affichage du bon puzzle */
+  // Hotspots → open puzzle at specific index
   const openPuzzleAt = (index: number) => {
     setCurrentPuzzleIndex(index);
     setIsPuzzleOpen(true);
@@ -219,7 +162,6 @@ const PageTourisme = () => {
     [validatedAnswers]
   );
 
-  /** Render */
   return (
     <Background>
       <GreekFrise position="top" tilesPerViewport={6.5} height={FRIEZE_HEIGHT} />
@@ -246,7 +188,7 @@ const PageTourisme = () => {
           </div>
         </header>
 
-        {/* 🖼️ Image + zones cliquables */}
+        {/* Image + clickable zones */}
         <div className="w-full flex justify-center mb-8">
           <div className="relative inline-block">
             <img
@@ -263,7 +205,7 @@ const PageTourisme = () => {
             {/* zone 1 → acropole */}
             <button
               onClick={() => openPuzzleAt(0)}
-              className="absolute bg-transparent border-hidden rounded-md cursor-default"
+              className="absolute bg-transparent border-hidden rounded-md cursor-pointer hover:bg-white/10 transition-colors"
               style={{ left: "33.7%", top: "22%", width: "28%", height: "22%" }}
               aria-label="Ouvrir l'énigme sur l'Acropole"
             />
@@ -271,13 +213,13 @@ const PageTourisme = () => {
             {/* zone 2 → delphes */}
             <button
               onClick={() => openPuzzleAt(1)}
-              className="absolute bg-transparent border-hidden rounded-md cursor-default"
+              className="absolute bg-transparent border-hidden rounded-md cursor-pointer hover:bg-white/10 transition-colors"
               style={{ left: "70%", top: "12%", width: "22%", height: "8%" }}
               aria-label="Ouvrir l'énigme sur Delphes"
             />
 
             <div className="absolute bottom-3 left-3 bg-black/70 text-white px-3 py-2 rounded-lg text-sm">
-              Cliquez sur les zones invisibles de l’image pour ouvrir une énigme.
+              Cliquez sur les zones invisibles de l'image pour ouvrir une énigme.
             </div>
           </div>
         </div>
@@ -294,39 +236,6 @@ const PageTourisme = () => {
                     : index === currentPuzzleIndex
                     ? "bg-[#8B7355] scale-125"
                     : "bg-[#C4B5A0]"
-  const toggleHint = () => {
-    setHints({...hints, [currentPuzzle.id as keyof typeof hints]: !hints[currentPuzzle.id as keyof typeof hints]});
-  };
-
-  return (
-    <Background>
-      <GreekFrise position="top" />
-      <GreekFrise position="bottom" />
-      
-      <div className="relative z-10 w-full max-w-4xl">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Mountain className="w-8 h-8 text-[#8B7355]" />
-            <h1 className="text-4xl md:text-5xl font-bold text-[#5C4033]">
-              Tourisme
-            </h1>
-            <Mountain className="w-8 h-8 text-[#8B7355]" />
-          </div>
-          <p className="text-[#8B7355] text-lg">
-            Explorez les merveilles de la Grèce antique
-          </p>
-        </div>
-  
-        {/* Progress Indicator */}
-        <div className="mb-8">
-          <div className="flex justify-center gap-2 mb-4">
-            {puzzles.map((_, index) => (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index < currentPuzzleIndex ? 'bg-[#5C4033]' :
-                  index === currentPuzzleIndex ? 'bg-[#8B7355] scale-125' :
-                  'bg-[#C4B5A0]'
                 }`}
               />
             ))}
@@ -337,7 +246,7 @@ const PageTourisme = () => {
         </div>
       </div>
 
-      {/* 🪟 pop-up d'énigme */}
+      {/* Puzzle popup dialog */}
       <Dialog open={isPuzzleOpen} onOpenChange={setIsPuzzleOpen}>
         <DialogContent
           className="
@@ -354,11 +263,11 @@ const PageTourisme = () => {
                 validatedAnswers[currentPuzzle.id] === true
                   ? "border-green-500 ring-1 ring-green-500/30"
                   : validatedAnswers[currentPuzzle.id] === false
-                  ? "border-red-500 ring-1 ring-red-500/30"
+                  ? "border-red-500 ring-1 ring-red-500/30 shake"
                   : "hover:shadow-2xl"
               }`}
           >
-            {/* En-tête */}
+            {/* Header */}
             <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
               <div className="flex items-center justify-between gap-4">
                 <h2 id="puzzle-title" className="text-lg font-semibold text-white">
@@ -372,7 +281,7 @@ const PageTourisme = () => {
               </div>
             </div>
 
-            {/* Corps */}
+            {/* Body */}
             <form onSubmit={onFormSubmit} className="p-6 text-center text-xl" noValidate>
               <div className="bg-[#DDD1BC] rounded-lg px-4 py-3 mb-4">
                 <p className="text-[#5C4033] text-[19px] md:text-2xl leading-snug font-semibold">
@@ -466,7 +375,7 @@ const PageTourisme = () => {
         </DialogContent>
       </Dialog>
 
-      {/* transition finale */}
+      {/* Final transition */}
       {showTransition && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
@@ -476,126 +385,20 @@ const PageTourisme = () => {
             </h2>
             <p className="text-[#8B7355] mb-6">
               Les sites sacrés vous ont révélé leurs secrets ! Dernière étape :
-              l&apos;Environnement...
+              l'Environnement...
             </p>
             <ArrowRight className="w-8 h-8 text-[#8B7355] animate-pulse mx-auto" />
           </div>
         </div>
       )}
-  
-        {/* Main Puzzle Card */}
-        <div className={`bg-white/80 backdrop-blur rounded-2xl shadow-xl border-2 border-[#8B7355]/20 overflow-hidden transition-all duration-500 ${
-          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? 'border-green-600 shadow-green-600/20' :
-          validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false ? 'border-red-600 shake' : ''
-        }`}>
-          <div className="bg-gradient-to-r from-[#8B7355] to-[#A0826D] p-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white">
-                {currentPuzzle.title}
-              </h2>
-              {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true ? (
-                <Unlock className="w-6 h-6 text-white" />
-              ) : (
-                <Lock className="w-6 h-6 text-white/60" />
-              )}
-            </div>
-          </div>
-  
-          <div className="p-6">
-            <p className="text-[#5C4033] text-lg mb-6 font-medium">
-              {currentPuzzle.question}
-            </p>
-  
-            {/* Visual hints for rebus */}
-            {currentPuzzle.type === 'rebus' && currentPuzzle.visual && (
-              <div className="flex flex-wrap gap-3 mb-6 justify-center bg-[#F5E6D3] rounded-xl p-4">
-                {currentPuzzle.visual.map((item, idx) => (
-                  <div key={idx} className="text-2xl font-bold text-[#5C4033] px-4 py-2 bg-white rounded-lg shadow-md">
-                    {item}
-                  </div>
-                ))}
-              </div>
-            )}
-  
-            {/* Answer Input */}
-            <div className="flex gap-3 mb-4">
-              <input
-                type="text"
-                value={answers[currentPuzzle.id as keyof typeof answers] || ''}
-                onChange={(e) => setAnswers({...answers, [currentPuzzle.id]: e.target.value})}
-                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
-                placeholder="Votre réponse..."
-                className={`flex-1 px-4 py-3 rounded-xl border-2 bg-white focus:outline-none focus:ring-2 transition-all ${
-                  validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true
-                    ? 'border-green-500 bg-green-50'
-                    : 'border-[#C4B5A0] focus:ring-[#8B7355]/30 focus:border-[#8B7355]'
-                }`}
-              />
-              
-              <button
-                onClick={handleSubmit}
-                disabled={validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true}
-                className="px-6 py-3 bg-gradient-to-r from-[#8B7355] to-[#A0826D] text-white font-bold rounded-xl hover:from-[#7A6248] hover:to-[#8B7355] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-              >
-                Valider
-              </button>
-              
-              <button
-                onClick={toggleHint}
-                className="px-4 py-3 bg-[#F5E6D3] text-[#5C4033] rounded-xl hover:bg-[#E8D4B8] transition-all shadow-md"
-                title="Indice"
-              >
-                💡
-              </button>
-            </div>
-  
-            {/* Hint Display */}
-            {hints[currentPuzzle.id as keyof typeof hints] && (
-              <div className="p-4 bg-[#FFF8DC] border-2 border-[#D4AF37]/30 rounded-lg">
-                <p className="text-[#8B7355] flex items-center gap-2">
-                  <span className="text-xl">💡</span>
-                  <span className="font-medium">Indice : {currentPuzzle.hint}</span>
-                </p>
-              </div>
-            )}
-  
-            {/* Feedback Messages */}
-            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === true && (
-              <div className="mt-4 p-3 bg-green-100 rounded-lg flex items-center gap-2 text-green-700">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-semibold">Excellent ! Site découvert avec succès !</span>
-              </div>
-            )}
-            {validatedAnswers[currentPuzzle.id as keyof typeof validatedAnswers] === false && (
-              <div className="mt-4 p-3 bg-red-100 rounded-lg flex items-center gap-2 text-red-700">
-                <XCircle className="w-5 h-5" />
-                <span>Ce n'est pas la bonne réponse. Continuez à explorer...</span>
-              </div>
-            )}
-          </div>
-        </div>
-  
-        {/* Transition Overlay */}
-        {showTransition && (
-          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-            <div className="bg-white rounded-3xl p-8 text-center max-w-md shadow-2xl">
-              <div className="text-6xl mb-4">🏛️</div>
-              <h2 className="text-3xl font-bold text-[#5C4033] mb-4">
-                Voyage accompli !
-              </h2>
-              <p className="text-[#8B7355] mb-6">
-                Les sites sacrés vous ont révélé leurs secrets !
-                Dernière étape : l'Environnement...
-              </p>
-              <div className="flex justify-center">
-                <ArrowRight className="w-8 h-8 text-[#8B7355] animate-pulse" />
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-  
+
+      <Chat
+        sessionId={sessionId || 'debug-session'}
+        currentUser={currentUser || 'Anonyme'}
+        anchor="br"
+        frise={40}
+      />
+
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -606,11 +409,6 @@ const PageTourisme = () => {
           animation: shake 0.3s ease-in-out;
         }
       `}</style>
-        <Chat
-          sessionId={sessionId || 'debug-session'}
-          currentUser={currentUser || 'Anonyme'} anchor="br" frise={40}
-        />
-     
     </Background>
   );
 };
